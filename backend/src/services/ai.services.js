@@ -7,9 +7,23 @@ const model = new ChatMistralAI({
   model: "mistral-small-latest"
 });
 
-const searchInternetTool = tool(
+const MAX_SOURCES = 8;
+
+const makeSearchTool = (onSources) => tool(
     async ({ query }) => {
       const response = await searchInternet(query);
+
+      // The tool still returns its raw JSON to the model. We also lift the
+      // source cards out so the answer can keep its audit trail.
+      try {
+        const parsed = JSON.parse(response);
+        if (Array.isArray(parsed?.sources) && typeof onSources === "function") {
+          onSources(parsed.sources);
+        }
+      } catch {
+        // A malformed search payload should never break the answer.
+      }
+
       return response;
     },
     {
@@ -20,11 +34,6 @@ const searchInternetTool = tool(
       })
     }
 );
-
-const agent = createAgent({
-  model: model,
-  tools: [searchInternetTool]
-})
 
 const extractChunkText = (chunk) => {
   const content = chunk?.content;
@@ -43,7 +52,39 @@ const extractChunkText = (chunk) => {
   return "";
 };
 
-const generateResponse = async (messages, onChunk) => {
+const cleanSource = (source) => {
+  if (!source || typeof source !== "object") return null;
+
+  const url = typeof source.url === "string" ? source.url.trim() : "";
+  if (!/^https?:\/\//i.test(url)) return null;
+
+  return {
+    title: typeof source.title === "string" ? source.title.trim() : "",
+    url,
+    snippet: typeof source.snippet === "string" ? source.snippet.trim() : ""
+  };
+};
+
+const generateResponse = async (messages, onChunk, onSources) => {
+  const collected = new Map();
+
+  const collectSources = (incoming) => {
+    incoming.forEach((source) => {
+      const clean = cleanSource(source);
+      if (!clean || collected.has(clean.url)) return;
+      collected.set(clean.url, clean);
+    });
+
+    if (typeof onSources === "function") {
+      onSources(Array.from(collected.values()).slice(0, MAX_SOURCES));
+    }
+  };
+
+  const agent = createAgent({
+    model: model,
+    tools: [makeSearchTool(collectSources)]
+  });
+
   const formattedMessages = messages
     .map((msg) => {
       if (msg.role === "user") return new HumanMessage(msg.content);

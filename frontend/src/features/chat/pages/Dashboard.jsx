@@ -1,19 +1,37 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { AlertCircle, ArrowUpRight, LogOut, Menu } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import {
+  AlertCircle,
+  ArrowUpRight,
+  Check,
+  Download,
+  Link2,
+  LogOut,
+  Menu,
+  Share2,
+} from "lucide-react";
 import Brand from "../../../components/Brand";
 import { useAuth } from "../../auth/hook/useAuth";
 import useChat from "../hook/useChat";
-import { setChats, setCurrentChatId, setError } from "../chat.slice";
-import AnswerBlock, { AnswerSkeleton } from "../components/AnswerBlock";
+import {
+  setChats,
+  setCurrentChatId,
+  setError,
+  setQuotaError,
+} from "../chat.slice";
+import { AnswerSkeleton } from "../components/AnswerBlock";
 import Composer from "../components/Composer";
 import ResearchRail from "../components/ResearchRail";
+import ThreadBody from "../components/ThreadBody";
 import {
   makeThreadTitle,
   readRecentThreads,
   rememberThread,
 } from "../utils/recentThreads";
 import { formatDeskDate, formatMemoDate } from "../utils/threadGroups";
+import { copyToClipboard } from "../utils/clipboard";
+import { downloadThreadMarkdown } from "../utils/threadMarkdown";
 
 const SUGGESTIONS = [
   {
@@ -92,22 +110,35 @@ const ThreadPending = () => (
 
 const Dashboard = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const composerRef = useRef(null);
   const mainRef = useRef(null);
+  const shareTimerRef = useRef(null);
 
-  const { handleSendMessage, handleGetChats, handleOpenChats } = useChat();
+  const {
+    handleSendMessage,
+    handleGetChats,
+    handleOpenChats,
+    handleRenameChat,
+    handleTogglePin,
+    handleShareChat,
+  } = useChat();
   const { handleLogout } = useAuth();
 
   const [isRailOpen, setIsRailOpen] = useState(false);
   const [inputText, setInputText] = useState("");
   const [isSending, setIsSending] = useState(false);
   const [recentThreads, setRecentThreads] = useState(readRecentThreads);
+  const [shareStatus, setShareStatus] = useState("idle");
+  const [shareError, setShareError] = useState("");
+  const [isSigningOut, setIsSigningOut] = useState(false);
 
   const user = useSelector((state) => state.auth.user);
   const chats = useSelector((state) => state.chat.chats);
   const currentChatId = useSelector((state) => state.chat.currentChatId);
   const loading = useSelector((state) => state.chat.loading);
   const error = useSelector((state) => state.chat.error);
+  const quotaError = useSelector((state) => state.chat.quotaError);
 
   const activeChat = currentChatId ? chats?.[currentChatId] : null;
   const messages = useMemo(() => activeChat?.messages || [], [activeChat?.messages]);
@@ -128,7 +159,22 @@ const Dashboard = () => {
   const showThreadLoading = loading && hasThread && messages.length === 0;
   const showEmptyThread = !loading && hasThread && messages.length === 0;
 
-  const accountName = user?.username || user?.email || "Researcher";
+  const isShared = Boolean(activeChat?.shared && activeChat?.shareId);
+  const publicShareUrl = activeChat?.shareId
+    ? `${window.location.origin}/share/${activeChat.shareId}`
+    : "";
+  const shareLabel =
+    shareStatus === "copied"
+      ? "Link copied"
+      : shareStatus === "working"
+        ? "Sharing"
+        : isShared
+          ? "Copy link"
+          : "Share";
+
+  const accountName = user?.isDemo
+    ? "Demo Researcher"
+    : user?.username || user?.email || "Researcher";
   const accountEmail =
     user?.email && user.email !== accountName ? user.email : "";
 
@@ -150,6 +196,13 @@ const Dashboard = () => {
     window.addEventListener("keydown", handleEscape);
     return () => window.removeEventListener("keydown", handleEscape);
   }, []);
+
+  useEffect(
+    () => () => {
+      if (shareTimerRef.current) window.clearTimeout(shareTimerRef.current);
+    },
+    [],
+  );
 
   // Keep a device-side index of the queries in the rail. Server history remains
   // the source of truth for messages; this only survives reloads.
@@ -188,6 +241,7 @@ const Dashboard = () => {
 
     setInputText("");
     dispatch(setError(null));
+    dispatch(setQuotaError(null));
     setIsSending(true);
     setRecentThreads(
       rememberThread({
@@ -199,18 +253,41 @@ const Dashboard = () => {
     );
 
     try {
-      await handleSendMessage({
+      const result = await handleSendMessage({
         message: trimmed,
         chatId: hasThread ? currentChatId : null,
       });
+
+      // A quota or rate-limit rejection never reached the server, so put the
+      // question back in the composer instead of losing the draft.
+      if (result?.quotaExceeded) {
+        setInputText((current) => (current.trim() ? current : trimmed));
+      }
     } finally {
       setIsSending(false);
     }
   };
 
+  const clearShareFeedback = () => {
+    if (shareTimerRef.current) window.clearTimeout(shareTimerRef.current);
+    setShareStatus("idle");
+    setShareError("");
+  };
+
+  const flashShareCopied = () => {
+    setShareStatus("copied");
+    if (shareTimerRef.current) window.clearTimeout(shareTimerRef.current);
+    shareTimerRef.current = window.setTimeout(
+      () => setShareStatus("idle"),
+      2600,
+    );
+  };
+
   const handleNewThread = () => {
     dispatch(setCurrentChatId(null));
     dispatch(setError(null));
+    dispatch(setQuotaError(null));
+    clearShareFeedback();
     setInputText("");
     setIsRailOpen(false);
     scrollToTop();
@@ -220,12 +297,16 @@ const Dashboard = () => {
   const handleOpenChat = (chatId) => {
     setIsRailOpen(false);
     dispatch(setError(null));
+    dispatch(setQuotaError(null));
+    clearShareFeedback();
     handleOpenChats(chatId, chats);
   };
 
   const handleReuseQuery = (query) => {
     dispatch(setCurrentChatId(null));
     dispatch(setError(null));
+    dispatch(setQuotaError(null));
+    clearShareFeedback();
     setInputText(query);
     setIsRailOpen(false);
     scrollToTop();
@@ -237,38 +318,83 @@ const Dashboard = () => {
     focusComposer();
   };
 
-  const handleSignOut = () => {
+  const handleExport = () => {
+    if (!hasThread) return;
+    downloadThreadMarkdown({
+      title: activeChat?.title || headline,
+      messages,
+    });
+  };
+
+  const handleShare = async () => {
+    if (!hasThread) return;
+    setShareError("");
+
+    // Already public: the action copies the existing link without toggling it
+    // off. Stopping sharing is a separate, explicit control.
+    if (isShared) {
+      try {
+        await copyToClipboard(publicShareUrl);
+        flashShareCopied();
+      } catch {
+        setShareStatus("error");
+        setShareError("The link could not be copied. Select it from the share bar.");
+      }
+      return;
+    }
+
+    setShareStatus("working");
+    const result = await handleShareChat(currentChatId);
+
+    if (!result.ok) {
+      setShareStatus("error");
+      setShareError(result.message || "Sharing could not be turned on.");
+      return;
+    }
+
+    if (!result.shared) {
+      setShareStatus("idle");
+      return;
+    }
+
+    const sharePath =
+      result.path || (result.shareId ? `/share/${result.shareId}` : "");
+    const url = sharePath
+      ? `${window.location.origin}${sharePath}`
+      : result.url;
+
+    try {
+      await copyToClipboard(url);
+      flashShareCopied();
+    } catch {
+      setShareStatus("error");
+      setShareError("Sharing is on, but the link could not be copied.");
+    }
+  };
+
+  const handleStopSharing = async () => {
+    setShareStatus("working");
+    const result = await handleShareChat(currentChatId);
+
+    if (!result.ok) {
+      setShareStatus("error");
+      setShareError(result.message || "Sharing could not be turned off.");
+      return;
+    }
+
+    clearShareFeedback();
+  };
+
+  const handleSignOut = async () => {
     setIsRailOpen(false);
+    setIsSigningOut(true);
     dispatch(setCurrentChatId(null));
     dispatch(setChats({}));
     dispatch(setError(null));
-    handleLogout();
+    dispatch(setQuotaError(null));
+    await handleLogout();
+    navigate("/login", { replace: true, state: { signedOut: true } });
   };
-
-  let answerNumber = 0;
-  const messageBlocks = messages.map((message, index) => {
-    const key = message._id || `${message.role}-${index}`;
-
-    if (message.role === "user") {
-      if (index === firstUserIndex) return null;
-
-      return (
-        <section className="follow-up" key={key} aria-label="Follow-up question">
-          <p className="follow-up-label">Follow-up</p>
-          <p className="follow-up-question">{message.content}</p>
-        </section>
-      );
-    }
-
-    answerNumber += 1;
-    return (
-      <AnswerBlock
-        key={key}
-        message={message}
-        number={answerNumber}
-      />
-    );
-  });
 
   return (
     <div className="desk">
@@ -293,7 +419,7 @@ const Dashboard = () => {
             type="button"
             className="brand-button"
             onClick={handleNewThread}
-            aria-label="Perplexity research desk — start new research"
+            aria-label="Perplexity research desk: start new research"
           >
             <Brand />
           </button>
@@ -307,7 +433,12 @@ const Dashboard = () => {
               {initialsFor(accountName)}
             </span>
             <span className="account-text">
-              <span className="account-name">{accountName}</span>
+              <span className="account-name">
+                {accountName}
+                {user?.isDemo && (
+                  <span className="account-demo">demo</span>
+                )}
+              </span>
               {accountEmail && (
                 <span className="account-email">{accountEmail}</span>
               )}
@@ -319,10 +450,14 @@ const Dashboard = () => {
             className="logout-btn"
             onClick={handleSignOut}
             title="Log out"
-            aria-label="Log out"
+            aria-label={isSigningOut ? "Signing out" : "Log out"}
+            disabled={isSigningOut}
+            aria-busy={isSigningOut}
           >
             <LogOut size={14} aria-hidden="true" />
-            <span className="logout-label">Log out</span>
+            <span className="logout-label">
+              {isSigningOut ? "Signing out" : "Log out"}
+            </span>
           </button>
         </div>
       </header>
@@ -345,6 +480,8 @@ const Dashboard = () => {
           onNew={handleNewThread}
           onOpen={handleOpenChat}
           onReuse={handleReuseQuery}
+          onRename={handleRenameChat}
+          onTogglePin={handleTogglePin}
         />
 
         <main
@@ -369,30 +506,100 @@ const Dashboard = () => {
                     {headline}
                   </h1>
 
-                  <div className="memo-meta">
-                    <span>{formatMemoDate(threadDate)}</span>
-                    <span className="meta-divider" aria-hidden="true">
-                      ·
-                    </span>
-                    <span>
-                      {answerCount} {answerCount === 1 ? "answer" : "answers"}
-                    </span>
-                    {isSending && (
-                      <>
-                        <span className="meta-divider" aria-hidden="true">
-                          ·
-                        </span>
-                        <span className="memo-live">
-                          <span className="desk-pulse" aria-hidden="true" />
-                          Working
-                        </span>
-                      </>
-                    )}
+                  <div className="memo-toolbar">
+                    <div className="memo-meta">
+                      <span>{formatMemoDate(threadDate)}</span>
+                      <span className="meta-divider" aria-hidden="true">
+                        ·
+                      </span>
+                      <span>
+                        {answerCount} {answerCount === 1 ? "answer" : "answers"}
+                      </span>
+                      {isSending && (
+                        <>
+                          <span className="meta-divider" aria-hidden="true">
+                            ·
+                          </span>
+                          <span className="memo-live">
+                            <span className="desk-pulse" aria-hidden="true" />
+                            Working
+                          </span>
+                        </>
+                      )}
+                    </div>
+
+                    <div className="memo-actions" aria-label="Thread actions">
+                      <button
+                        type="button"
+                        className="memo-action"
+                        data-status={shareStatus}
+                        onClick={handleShare}
+                        disabled={shareStatus === "working" || isSending}
+                      >
+                        {shareStatus === "copied" ? (
+                          <Check size={12} aria-hidden="true" />
+                        ) : (
+                          <Share2 size={12} aria-hidden="true" />
+                        )}
+                        <span>{shareLabel}</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        className="memo-action"
+                        onClick={handleExport}
+                        disabled={answerCount === 0 || isSending || hasStreamingAnswer}
+                      >
+                        <Download size={12} aria-hidden="true" />
+                        <span>Export</span>
+                      </button>
+                    </div>
                   </div>
+
+                  {isShared && (
+                    <div className="share-bar">
+                      <span className="share-bar-label">
+                        <Link2 size={11} aria-hidden="true" />
+                        Public link
+                      </span>
+                      <code className="share-bar-url" title={publicShareUrl}>
+                        {publicShareUrl}
+                      </code>
+                      <button
+                        type="button"
+                        className="share-bar-copy"
+                        onClick={handleShare}
+                      >
+                        {shareStatus === "copied" ? "Copied" : "Copy link"}
+                      </button>
+                      <button
+                        type="button"
+                        className="share-bar-stop"
+                        onClick={handleStopSharing}
+                        disabled={shareStatus === "working"}
+                      >
+                        Stop sharing
+                      </button>
+                    </div>
+                  )}
+
+                  {shareError && (
+                    <p className="share-error-note" role="alert">
+                      {shareError}
+                    </p>
+                  )}
+
+                  <span className="sr-only" role="status" aria-live="polite">
+                    {shareStatus === "copied"
+                      ? "Public link copied to the clipboard."
+                      : shareStatus === "error"
+                        ? "The share link action failed."
+                        : ""}
+                  </span>
                 </header>
 
                 <div className="memo-body">
-                  {messageBlocks}
+                  <ThreadBody messages={messages} />
 
                   {awaitingAnswer && <AnswerSkeleton />}
 
@@ -450,6 +657,8 @@ const Dashboard = () => {
                   variant="hero"
                   inputRef={composerRef}
                   placeholder="Ask the first question…"
+                  notice={quotaError}
+                  onDismissNotice={() => dispatch(setQuotaError(null))}
                 />
               </section>
             ) : (
@@ -486,6 +695,8 @@ const Dashboard = () => {
                     variant="hero"
                     inputRef={composerRef}
                     placeholder="What are you researching?"
+                    notice={quotaError}
+                    onDismissNotice={() => dispatch(setQuotaError(null))}
                   />
                 </div>
 
@@ -537,6 +748,8 @@ const Dashboard = () => {
                   placeholder={
                     isSending ? "Draft your next question…" : "Ask a follow-up…"
                   }
+                  notice={quotaError}
+                  onDismissNotice={() => dispatch(setQuotaError(null))}
                 />
               </div>
             </div>

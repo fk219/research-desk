@@ -1,10 +1,15 @@
 
 Features:
--Authentication System
--Chat with AI
+-Authentication System (verified email, JWT cookie, token-version revocation)
+-Chat with AI (Mistral + Tavily search)
 -Chat History
--Message Storage
+-Message Storage with source cards
 -AI with Internet Research Feature
+-Demo desk (shared account, seeded example threads)
+-Thread rename + pin
+-Read-only public share links
+-Markdown export
+-Daily quota (25 answered questions / user / UTC day) + per-IP rate limits
 
 
 DATA MODELLING:
@@ -14,6 +19,7 @@ DATA MODELLING:
     email,
     password,
     verified: yes or no,
+    tokenVersion: number (incremented on logout),
     createdAt,
     updatedAt,
 }
@@ -22,14 +28,17 @@ DATA MODELLING:
     id,
     user (Kis User ki chat hai),
     title,
+    pinned: boolean,
+    shared: boolean,
+    shareId: unique string (created on first share),
     createdAt,
     updatedAt
 }
 
 -Message{
     id,
-    chat (LKis chat ka message hai),
+    chat (Kis chat ka message hai),
     Content (Message ke andar ka content),
-    role: [user/ ai]
-
+    role: [user/ ai],
+    sources: [{ title, url, snippet }] (AI answers)
 }

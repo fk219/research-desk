@@ -2,26 +2,69 @@ import express from "express"
 import cookieParser from "cookie-parser"
 import morgan from "morgan"
 import cors from "cors"
+import helmet from "helmet"
+import compression from "compression"
 
 import authRouter from "./routes/auth.routes.js"
 import chatRouter from "./routes/chat.routes.js"
+import publicRouter from "./routes/public.routes.js"
+import { authLimiter } from "./middleware/rateLimit.middleware.js"
 
 const app = express()
 
-app.use(express.json())
+// Render sits behind a proxy, so req.ip (and therefore per-IP rate limits)
+// needs the forwarded address.
+app.set("trust proxy", 1)
+
+app.use(helmet({
+    // The email verification pages use inline styles, so keep those working.
+    contentSecurityPolicy: {
+        directives: {
+            defaultSrc: ["'self'"],
+            styleSrc: ["'self'", "'unsafe-inline'"],
+            imgSrc: ["'self'", "data:"],
+            scriptSrc: ["'self'"]
+        }
+    },
+    crossOriginResourcePolicy: { policy: "cross-origin" }
+}))
+app.use(express.json({ limit: "1mb" }))
 app.use(cookieParser())
 app.use(morgan("dev"))
+app.use(compression())
+
+const allowedOrigins = (
+    process.env.CORS_ORIGINS ||
+    "https://perplexity.furqankhan.dev,http://localhost:5173"
+)
+    .split(",")
+    .map((origin) => origin.trim())
+    .filter(Boolean)
+
 app.use(cors({
-    origin: ["https://perplexity.furqankhan.dev", "https://scaling-waddle-q5v7p6gvxj73wrx-5173.app.github.dev", "http://localhost:5173"],
+    origin: allowedOrigins,
     credentials: true,
-    methods: ["GET", "POST", "DELETE", "PUT"]
+    methods: ["GET", "POST", "DELETE", "PUT", "PATCH"]
 }))
 
-app.use("/api/auth", authRouter)
+app.use("/api/auth", authLimiter, authRouter)
 app.use("/api/chats", chatRouter)
+app.use("/api/public", publicRouter)
 
 app.get("/", (req, res) => {
     res.send("Hello World")
 })  
+
+app.use((req, res) => {
+    res.status(404).json({ error: "Route not found." })
+})
+
+app.use((error, _req, res, _next) => {
+    console.error("Unhandled API error:", error)
+    if (res.headersSent) return
+    res.status(error?.status || 500).json({
+        error: "Something went wrong. Try again in a moment."
+    })
+})
 
 export {app}

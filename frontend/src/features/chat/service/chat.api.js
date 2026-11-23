@@ -1,7 +1,9 @@
 import axios from 'axios'
 
+const API_ORIGIN = import.meta.env.VITE_API_URL || "https://perplexity-clone-7nda.onrender.com"
+
 const api = axios.create({
-    baseURL: "https://perplexity-clone-7nda.onrender.com",
+    baseURL: API_ORIGIN,
     withCredentials: true
 })
 
@@ -22,8 +24,14 @@ const streamMessage = async ({ message, chatId, onEvent }) => {
     })
 
     if (!response.ok) {
-        const error = await response.json().catch(() => ({}))
-        throw new Error(error.error || 'Failed to send message')
+        const payload = await response.json().catch(() => ({}))
+        const error = new Error(
+            payload.message || payload.error || 'Failed to send message',
+        )
+        error.status = response.status
+        error.code = payload.code
+        error.data = payload
+        throw error
     }
 
     const reader = response.body.getReader()
@@ -64,4 +72,28 @@ const deleteChat = async (chatId) => {
     return response.data
 }
 
-export { sendMessage, streamMessage, getChats, getMessages, deleteChat }
+const updateChat = async (chatId, patch) => {
+    const response = await api.patch(`/api/chats/${chatId}`, patch)
+    return response.data
+}
+
+const shareChat = async (chatId) => {
+    const response = await api.post(`/api/chats/${chatId}/share`)
+    return response.data
+}
+
+const getPublicChat = async (shareId) => {
+    const response = await api.get(`/api/public/chats/${encodeURIComponent(shareId)}`)
+    return response.data
+}
+
+export {
+    sendMessage,
+    streamMessage,
+    getChats,
+    getMessages,
+    deleteChat,
+    updateChat,
+    shareChat,
+    getPublicChat
+}

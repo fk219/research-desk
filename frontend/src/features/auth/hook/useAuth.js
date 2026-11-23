@@ -1,6 +1,6 @@
 import { useCallback } from "react";
 import { useDispatch } from "react-redux";
-import { register, login, getMe } from "../service/auth.api";
+import { register, login, demoLogin, logout, getMe } from "../service/auth.api";
 import { setUser, setLoading, setError } from "../auth.slice";
 
 const SESSION_ENDED_KEY = "perplexity:session-ended:v1";
@@ -70,6 +70,28 @@ export const useAuth = () => {
     [dispatch],
   );
 
+  const handleDemo = useCallback(
+    async () => {
+      try {
+        dispatch(setLoading(true));
+        const data = await demoLogin();
+        setSessionEnded(false);
+        dispatch(setUser(data.user));
+        return { ok: true, user: data.user };
+      } catch (error) {
+        const message =
+          error.response?.data?.message ||
+          error.response?.data?.error ||
+          "The demo desk could not be opened. Try again.";
+        dispatch(setError(message));
+        return { ok: false, message };
+      } finally {
+        dispatch(setLoading(false));
+      }
+    },
+    [dispatch],
+  );
+
   const handleGetMe = useCallback(async () => {
     if (hasEndedSession()) {
       dispatch(setUser(null));
@@ -94,16 +116,26 @@ export const useAuth = () => {
     }
   }, [dispatch]);
 
-  const handleLogout = useCallback(() => {
+  const handleLogout = useCallback(async () => {
+    // Revoke the server-side session first, then clear the local desk. The
+    // local state is cleared even if the request fails or the cookie is gone.
+    try {
+      await logout();
+    } catch {
+      // Nothing else to do: the UI must not stay in a signed-in state.
+    }
+
     setSessionEnded(true);
     dispatch(setUser(null));
     dispatch(setError(null));
     dispatch(setLoading(false));
+    return { ok: true };
   }, [dispatch]);
 
   return {
     handleRegister,
     handleLogin,
+    handleDemo,
     handleGetMe,
     handleLogout,
   };

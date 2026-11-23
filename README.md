@@ -1,11 +1,13 @@
-# Perplexity Clone
+# Perplexity: Research Desk
 
-A research answer engine: ask a question, the backend searches the live web with Tavily, reasons over the results with Mistral, and returns an answer you can keep in a thread.
+A research workspace for questions you intend to keep. Ask a question, the backend searches the live web with Tavily and reasons over the results with Mistral, and the answer is filed as a reading note: sourced prose, a numbered source list, and a thread you can reopen, organise, export or share.
+
+The desk is built around one promise: **give me an answer I can keep, cite, share and verify.**
 
 **Live app:** https://perplexity.furqankhan.dev
 **API:** https://perplexity-clone-7nda.onrender.com
 
-![Perplexity Clone](docs/preview.png)
+![Perplexity Research Desk](docs/preview.png)
 
 ![React](https://img.shields.io/badge/React-19-149ECA?logo=react&logoColor=white)
 ![Vite](https://img.shields.io/badge/Vite-7-646CFF?logo=vite&logoColor=white)
@@ -17,31 +19,37 @@ A research answer engine: ask a question, the backend searches the live web with
 
 ## What it does
 
-Most chat demos answer from the model's memory. This one answers from today's web: the model decides when it needs to search, calls a Tavily search tool, and writes the answer from the returned pages. Every conversation is stored per user, and every account has to verify its email before it can sign in.
+Most chat demos answer from the model's memory and throw the conversation away. This one answers from today's web, keeps the question next to the answer, and stores the source cards that the search tool returned. That makes the thread an audit trail rather than a disposable reply.
 
-## Features
+Core capabilities:
 
-**Research desk**
-- Thread rail grouped by date, merging server history with recent local queries.
-- Editorial answer layout with markdown rendering, numbered sections, and source cards when the search tool returns sources.
-- Copy any answer with a short confirmation.
-- Skeleton loading for answers, explicit empty states, and clear error states (including interrupted searches).
-- Suggested research prompts on the empty dashboard.
-- Mobile thread drawer with scrim, `Escape` to close, and focus handling.
-- `Enter` sends, `Shift` + `Enter` adds a line.
+- **Sourced answers with an audit trail.** The search tool hands the model live results, and the answer message stores the numbered sources (title, URL, snippet) that were retrieved. Citations such as `[2]` jump to the matching source card.
+- **Saved research threads.** Server-side thread history per account, grouped by date in the rail.
+- **Thread organisation.** Rename inline, pin a thread to the top, and keep date grouping for everything else.
+- **Read-only public reports.** Turn a thread into a share link at `/share/:shareId`. The public view keeps the same editorial reading layout, exposes no account identity, and can be switched off again.
+- **Markdown export.** Download the question, answer, and numbered sources with URLs as a portable `.md` file.
+- **Demo access.** One click opens a shared demo desk with seeded example threads. No email verification required.
+- **Real logout.** Logout increments the user's `tokenVersion`, revoking every JWT issued before that moment, and clears the cookie.
+- **Abuse limits.** 25 answered questions per user per UTC day, plus per-IP rate limits on auth and message sends.
 
-**Accounts**
-- Register, log in, log out, and protected routes.
-- Email verification link with a signed JWT.
-- Inline validation on auth forms, password visibility toggle, and loading states.
-- JWT delivered in an `httpOnly`, `SameSite=None`, `Secure` cookie; passwords hashed with bcrypt.
-- Logout clears the client session and suppresses cookie auto-login until the next sign-in.
+## Demo access
+
+Open **`/login`** and choose **Open the demo desk**.
+
+- The endpoint `POST /api/auth/demo` finds or creates the shared account `demo@researchdesk.local` with a random password hash and a verified email.
+- On first use it seeds three clearly labelled example threads with static answers and example sources. Seeding is idempotent and only runs when the demo account has no threads.
+- No extra environment variables are required.
+- The demo account is shared: threads and questions added there are visible to later visitors. It is a showcase, not a private workspace. The daily quota applies to the demo account too.
+- Because the account is shared, logging out of the demo revokes the demo session for other visitors as well. That is the same real session-revocation behaviour every account gets.
+
+The demo endpoint is limited to 3 requests per minute per IP.
 
 ## How an answer is produced
 
 ```
 Client (React + Redux)  ──POST /api/chats/message──►  Express API
                                                         │
+                                                        ├─ daily quota check (25/user/UTC day)
                                                         ▼
                                               Mistral + tool calling
                                                    │
@@ -50,14 +58,35 @@ Client (React + Redux)  ──POST /api/chats/message──►  Express API
                                                    ▼
                                             Tavily web search
                                                    │
-                                                   ▼
-                                     answer + sources  ──► MongoDB
+                                      answer + numbered sources
                                                    │
                                                    ▼
-                                          client renders answer
+                                     MongoDB (Message + sources)
+                                                   │
+                                                   ▼
+                                 client streams answer, then source cards
 ```
 
-The search tool is a LangChain `tool()` with a zod schema, so the model chooses the query and the backend controls the execution.
+The search tool is a LangChain `tool()` with a zod schema, so the model chooses the query and the backend controls execution. The tool's returned source list is captured alongside the streamed answer, not reconstructed on the client.
+
+## Sharing and privacy
+
+- A chat gets a `shareId` only on its first share. Turning sharing off keeps the id, so turning it back on restores the same link.
+- `GET /api/public/chats/:shareId` returns only the title, timestamps, and the messages with role, content, sources, and date.
+- The public payload never includes a user email, user id, chat id, or message id.
+- Public links are read-only. There is no public endpoint to write, rename, delete, or chat.
+- Sharing is off by default for every existing and new thread.
+
+## Limits
+
+| Limit | Scope |
+|---|---|
+| 25 answered questions per UTC day | Per authenticated user (counted from stored AI messages) |
+| 10 requests per minute | `/api/auth/*`, per IP |
+| 3 requests per minute | `POST /api/auth/demo`, per IP |
+| 10 requests per minute | Message sends, per IP |
+
+Quota and rate-limit failures return HTTP `429` with a JSON `message` and `code` (`DAILY_QUOTA_EXCEEDED` or `RATE_LIMITED`). The composer surfaces the message inline and keeps the question in the draft so it can be retried.
 
 ## Tech stack
 
@@ -65,6 +94,7 @@ The search tool is a LangChain `tool()` with a zod schema, so the model chooses 
 |---|---|
 | Frontend | React 19, Vite, Redux Toolkit, react-router-dom, react-markdown, lucide-react |
 | Backend | Node.js, Express 5, Mongoose, JWT, bcrypt, cookie-parser, morgan |
+| Security | helmet, express-rate-limit, httpOnly session cookie, token-version revocation |
 | AI | Mistral Small via `@langchain/mistralai` |
 | Search | Tavily (`@tavily/core`) |
 | Email | Nodemailer with a Gmail app password |
@@ -76,18 +106,22 @@ The search tool is a LangChain `tool()` with a zod schema, so the model chooses 
 backend/
   server.js
   src/
-    app.js                     Express app + CORS
-    routes/                    auth, chat
-    controllers/               register, verify, login, me, chats, messages
+    app.js                     Express app, CORS, helmet, rate limits
+    routes/                    auth, chat, public share
+    controllers/               auth, demo/logout, chats, messages, shares
+    middleware/                identifyUser, rate limiters
     services/
-      ai.services.js           Mistral client + search tool
+      ai.services.js           Mistral client + source-capturing search tool
       internet.service.js      Tavily search adapter
-    models/                    User, Chat, Message
+      demo.service.js          shared demo account + idempotent seed
+      quota.service.js         daily answered-question quota
+    models/                    User (tokenVersion), Chat (pinned/shared/shareId), Message (sources)
 frontend/
   src/
     app/                       store, routes, global styles
-    features/auth/             auth pages, hook, API client, guard
-    features/chat/             dashboard, rail, composer, answer block
+    features/auth/             auth pages, demo entry, hook, API client, guard
+    features/chat/             dashboard, rail, composer, answer block, export helper
+    features/share/            public read-only report (lazy-loaded route)
     components/Brand.jsx
 ```
 
@@ -106,6 +140,8 @@ npm install
 npm run dev                  # http://localhost:5173
 ```
 
+The demo desk needs only a working `MONGO_URI` and `JWT_SECRET`; the live answer flow also needs `MISTRAL_API_KEY` and `TAVILY_API_KEY`. Seeded demo threads do not call either provider.
+
 ### Environment variables
 
 | Key | Purpose |
@@ -114,28 +150,35 @@ npm run dev                  # http://localhost:5173
 | `NODE_ENV` | Enables `Secure`/`SameSite=None` cookies in production |
 | `MONGO_URI` | MongoDB connection string |
 | `JWT_SECRET` | Signs session and email-verification tokens |
-| `FRONTEND_URL` | Used in email links and client origin |
+| `FRONTEND_URL` | Used in email links and as the default base for share links |
 | `BACKEND_URL` | Base URL for verification links |
 | `GOOGLE_USER` / `GOOGLE_PASSWORD` | Gmail sender and app password |
 | `MISTRAL_API_KEY` | Answer generation |
 | `TAVILY_API_KEY` | Web search |
+| `SHARE_BASE_URL` | *Optional.* Overrides the public base URL used in share responses. Falls back to `FRONTEND_URL`. |
 
 ## API
 
 | Method | Route | Auth | Purpose |
 |---|---|---|---|
-| `POST` | `/api/auth/register` | — | Create account, send verification email |
-| `GET` | `/api/auth/verify-email?token=` | — | Verify email |
-| `POST` | `/api/auth/login` | — | Sign in, set cookie |
+| `POST` | `/api/auth/register` | Public | Create account, send verification email |
+| `GET` | `/api/auth/verify-email?token=` | Public | Verify email |
+| `POST` | `/api/auth/login` | Public | Sign in, set session cookie |
+| `POST` | `/api/auth/demo` | Public | Open the shared demo desk (3/min per IP) |
+| `POST` | `/api/auth/logout` | Cookie (best effort) | Increment `tokenVersion`, clear cookie |
 | `GET` | `/api/auth/get-me` | Cookie | Current user |
-| `POST` | `/api/chats/message` | Cookie | Ask a question |
-| `GET` | `/api/chats` | Cookie | List threads |
+| `POST` | `/api/chats/message` | Cookie | Ask a question (SSE when `stream: true`) |
+| `GET` | `/api/chats` | Cookie | List threads, pinned first |
 | `GET` | `/api/chats/:chatId/messages` | Cookie | Load a thread |
-| `DELETE` | `/api/chats/delete/:chatId` | Cookie | Delete a thread |
+| `PATCH` | `/api/chats/:chatId` | Cookie | Rename (`title`) and/or pin (`pinned`) |
+| `POST` | `/api/chats/:chatId/share` | Cookie | Toggle sharing, return public URL |
+| `DELETE` | `/api/chats/delete/:chatId` | Cookie | Delete a thread and its messages |
+| `GET` | `/api/public/chats/:shareId` | Public | Read-only shared report |
 
 ## Deployment notes
 
 - The API runs on Render's free plan, so the first request after idle can take ~50 seconds.
-- CORS is restricted to the production app URL plus localhost.
+- CORS is restricted to the production app URL plus localhost; `PATCH` is allowed for thread updates.
 - Verification emails need a Gmail app password, not the account password.
-- `frontend/vercel.json` rewrites client routes to `index.html`.
+- `frontend/vercel.json` rewrites client routes to `index.html`, so `/share/:shareId` resolves to the SPA.
+- Set `FRONTEND_URL` (or `SHARE_BASE_URL`) to the public web origin so share responses return usable URLs. The frontend copies the current origin's `/share/:shareId` link regardless.

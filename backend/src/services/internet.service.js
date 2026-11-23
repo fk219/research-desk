@@ -34,7 +34,10 @@ const searchInternet = async (queryInput) => {
 
         const sources = (searchResult.results || []).map((result) => ({
             title: result.title,
-            url: result.url
+            url: result.url,
+            snippet: typeof result.content === "string"
+                ? result.content.slice(0, 240)
+                : ""
         }));
 
         return JSON.stringify({

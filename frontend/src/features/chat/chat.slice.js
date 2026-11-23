@@ -6,7 +6,8 @@ const chatSlice = createSlice({
         chats: {},
         currentChatId: null,
         loading: false,
-        error: null
+        error: null,
+        quotaError: null
     },
     reducers: {
         createNewChat: (state, action) => {
@@ -14,7 +15,10 @@ const chatSlice = createSlice({
             state.chats[chatId] = {
                 _id: chatId,
                 title: title || "New Thread",
-                messages: []
+                messages: [],
+                pinned: false,
+                shared: false,
+                shareId: null
             }
         },
         addNewMessage: (state, action) => {
@@ -23,7 +27,10 @@ const chatSlice = createSlice({
                 state.chats[chatId] = {
                     _id: chatId,
                     title: "New Thread",
-                    messages: []
+                    messages: [],
+                    pinned: false,
+                    shared: false,
+                    shareId: null
                 }
             }
             state.chats[chatId].messages.push(message)
@@ -68,13 +75,40 @@ const chatSlice = createSlice({
                 state.chats[chatId] = {
                     _id: chatId,
                     title: "New Thread",
-                    messages: []
+                    messages: [],
+                    pinned: false,
+                    shared: false,
+                    shareId: null
                 }
             }
             state.chats[chatId].messages = messages
         },
         setChats: (state, action) => {
             state.chats = action.payload
+        },
+        updateChatMeta: (state, action) => {
+            const { chatId, patch } = action.payload
+            const chat = state.chats[chatId]
+            if (!chat || !patch) return
+            Object.assign(chat, patch)
+        },
+        removePendingUserMessage: (state, action) => {
+            const { chatId } = action.payload
+            const chat = state.chats[chatId]
+            if (!chat) return
+
+            for (let index = chat.messages.length - 1; index >= 0; index -= 1) {
+                const message = chat.messages[index]
+                if (message.role === "user" && !message._id) {
+                    chat.messages.splice(index, 1)
+                    break
+                }
+            }
+
+            if (chatId === "temp" && chat.messages.length === 0) {
+                delete state.chats.temp
+                if (state.currentChatId === "temp") state.currentChatId = null
+            }
         },
         setCurrentChatId: (state, action) => {
             state.currentChatId = action.payload
@@ -84,6 +118,9 @@ const chatSlice = createSlice({
         },
         setError: (state, action) => {
             state.error = action.payload
+        },
+        setQuotaError: (state, action) => {
+            state.quotaError = action.payload
         }
     }
 })
@@ -96,9 +133,12 @@ export const {
     stopAiStreaming,
     setMessages,
     setChats,
+    updateChatMeta,
+    removePendingUserMessage,
     setCurrentChatId,
     setLoading,
-    setError
+    setError,
+    setQuotaError
 } = chatSlice.actions
 
 export default chatSlice.reducer

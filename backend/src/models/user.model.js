@@ -26,6 +26,12 @@ const userSchema = new mongoose.Schema(
             type: Boolean,
             required: true,
             default: false
+        },
+        // Incremented on logout so every JWT issued before that moment is
+        // rejected by identifyUser. Existing users start at 0.
+        tokenVersion: {
+            type: Number,
+            default: 0
         }
     }, { timestamps: true }
 )

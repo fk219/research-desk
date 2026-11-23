@@ -15,9 +15,34 @@ const identifyUser = async (req, res, next) => {
 
     try{
         const decoded = jwt.verify(token, process.env.JWT_SECRET)
-        req.user = decoded
+
+        const user = await userModel.findById(decoded.id).select("_id username email verified tokenVersion")
+
+        if (!user) {
+            return res.status(401).json({
+                message: "Session no longer valid. Sign in again.",
+                status: false,
+                err: "User Not Found"
+            })
+        }
+
+        // Any cookie issued before the last logout carries an older version.
+        if ((decoded.tokenVersion ?? 0) !== (user.tokenVersion ?? 0)) {
+            return res.status(401).json({
+                message: "Session ended. Sign in again.",
+                status: false,
+                err: "Session Revoked",
+                code: "SESSION_REVOKED"
+            })
+        }
+
+        req.user = {
+            id: user._id.toString(),
+            email: user.email,
+            username: user.username
+        }
         next()
-        
+
     }catch(err){
         return res.status(401).json({
             message: "Unauthorised",

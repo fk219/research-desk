@@ -1,12 +1,57 @@
 import {userModel} from '../models/user.model.js'
 import {sendEmail} from '../services/mail.service.js'
+import {ensureDemoUser, seedDemoThreads, DEMO_EMAIL, DEMO_USERNAME} from '../services/demo.service.js'
 import jwt from 'jsonwebtoken'
 
 const frontendUrl = process.env.FRONTEND_URL || 'https://scaling-waddle-q5v7p6gvxj73wrx-5173.app.github.dev'
 const backendUrl = process.env.BACKEND_URL || 'https://scaling-waddle-q5v7p6gvxj73wrx-3000.app.github.dev'
 
+const isProduction = () => process.env.NODE_ENV === "production"
+
+const cookieOptions = () => ({
+    httpOnly: true,
+    secure: isProduction(),
+    sameSite: isProduction() ? "none" : "lax"
+})
+
+const serializeUser = (user) => ({
+    id: user._id,
+    username: user.username,
+    email: user.email,
+    verified: user.verified,
+    isDemo: user.email === DEMO_EMAIL
+})
+
+const issueSession = (res, user) => {
+    const token = jwt.sign({
+        id: user._id,
+        email: user.email,
+        // identifyUser compares this with the stored value so a logout can
+        // revoke every cookie issued before it.
+        tokenVersion: user.tokenVersion ?? 0
+    }, process.env.JWT_SECRET, {expiresIn: '1d'})
+
+    res.cookie("token", token, {
+        ...cookieOptions(),
+        maxAge: 24 * 60 * 60 * 1000
+    })
+}
+
 const registerController = async (req, res, next) => {
     const {username, email, password} = req.body
+
+    // The shared demo identity is created by POST /api/auth/demo only.
+    if (
+        String(email).trim().toLowerCase() === DEMO_EMAIL ||
+        String(username).trim().toLowerCase() === DEMO_USERNAME
+    ) {
+        return res.status(400).json({
+            message: "That demo identity is reserved. Choose another email or username.",
+            success: false,
+            err: "Reserved Demo Identity"
+        })
+    }
+
     const existingUser = await userModel.findOne({
         $or: [{ email }, { username }]
     })
@@ -92,29 +137,80 @@ const loginController = async (req, res, next) => {
         })
     }
 
-    const token = jwt.sign({
-        id: user._id,
-        email: user.email
-    }, process.env.JWT_SECRET, {expiresIn: '1d'})
-
-    const isProduction = process.env.NODE_ENV === "production"
-
-    res.cookie("token", token, {
-        httpOnly: true,
-        secure: isProduction,
-        sameSite: isProduction ? "none" : "lax",
-        maxAge: 24 * 60 * 60 * 1000
-    })
+    issueSession(res, user)
 
     return res.status(200).json({
         message: "User Logged In Successfully!",
         success: true,
-        user: {
-            id: user._id,
-            username: user.username,
-            email: user.email
-        }
+        user: serializeUser(user)
     })
+}
+
+const demoLoginController = async (req, res, next) => {
+    try {
+        const user = await ensureDemoUser()
+
+        if (!user) {
+            return res.status(500).json({
+                message: "The demo desk could not be prepared. Try again.",
+                success: false
+            })
+        }
+
+        if (!user.verified) {
+            user.verified = true
+            await user.save()
+        }
+
+        // Seed only when the shared demo desk has no threads. Failures here
+        // should not block access to the desk itself.
+        try {
+            await seedDemoThreads(user._id)
+        } catch (error) {
+            console.error("Demo seed failed:", error.message)
+        }
+
+        issueSession(res, user)
+
+        return res.status(200).json({
+            message: "Demo desk opened.",
+            success: true,
+            demo: true,
+            user: serializeUser(user)
+        })
+    } catch (error) {
+        next(error)
+    }
+}
+
+const logoutController = async (req, res, next) => {
+    try {
+        const token = req.cookies?.token
+
+        if (token) {
+            try {
+                const decoded = jwt.verify(token, process.env.JWT_SECRET)
+                if (decoded?.id) {
+                    await userModel.updateOne(
+                        {_id: decoded.id},
+                        {$inc: {tokenVersion: 1}}
+                    )
+                }
+            } catch {
+                // An already-expired or invalid token still gets its cookie
+                // cleared; there is nothing left to revoke.
+            }
+        }
+
+        res.clearCookie("token", cookieOptions())
+
+        return res.status(200).json({
+            message: "Signed out.",
+            success: true
+        })
+    } catch (error) {
+        next(error)
+    }
 }
 
 const verifyEmailController = async (req, res, next) => {
@@ -209,8 +305,15 @@ const getMeController = async (req, res) => {
     res.status(200).json({
         message: "User Details Fetched Successfully",
         success: true,
-        user
+        user: serializeUser(user)
     })
 }
 
-export { registerController, verifyEmailController, loginController, getMeController }
+export {
+    registerController,
+    verifyEmailController,
+    loginController,
+    demoLoginController,
+    logoutController,
+    getMeController
+}

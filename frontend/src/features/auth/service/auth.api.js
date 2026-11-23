@@ -1,7 +1,9 @@
 import axios from 'axios'
 
+const API_ORIGIN = import.meta.env.VITE_API_URL || "https://perplexity-clone-7nda.onrender.com"
+
 const api = axios.create({
-    baseURL: "https://perplexity-clone-7nda.onrender.com",
+    baseURL: API_ORIGIN,
     withCredentials: true
 })
 
@@ -12,6 +14,16 @@ export const register = async ({email, username, password}) => {
 
 export const login = async ({email, password}) => {
     const response = await api.post('/api/auth/login', {email, password})
+    return response.data
+}
+
+export const demoLogin = async () => {
+    const response = await api.post('/api/auth/demo')
+    return response.data
+}
+
+export const logout = async () => {
+    const response = await api.post('/api/auth/logout')
     return response.data
 }
 

@@ -1,5 +1,5 @@
 import { useEffect, useId, useRef } from "react";
-import { ArrowUp } from "lucide-react";
+import { AlertCircle, ArrowUp, X } from "lucide-react";
 
 const Composer = ({
   value,
@@ -10,6 +10,8 @@ const Composer = ({
   variant = "hero",
   inputRef,
   placeholder = "Ask anything…",
+  notice = "",
+  onDismissNotice,
 }) => {
   const localRef = useRef(null);
   const labelId = useId();
@@ -65,6 +67,23 @@ const Composer = ({
         aria-describedby={hintId}
         autoComplete="off"
       />
+
+      {notice && (
+        <div className="composer-notice" role="alert">
+          <AlertCircle size={13} aria-hidden="true" />
+          <span>{notice}</span>
+          {onDismissNotice && (
+            <button
+              type="button"
+              className="composer-notice-dismiss"
+              onClick={onDismissNotice}
+              aria-label="Dismiss notice"
+            >
+              <X size={12} aria-hidden="true" />
+            </button>
+          )}
+        </div>
+      )}
 
       <div className="composer-foot">
         <p className="composer-hint" id={hintId}>

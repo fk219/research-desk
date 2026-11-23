@@ -1,22 +1,35 @@
 import React from 'react'
 import {createBrowserRouter} from 'react-router-dom'
-import Register from '../features/auth/pages/Register'
-import Login from '../features/auth/pages/Login'
-import Dashboard from '../features/chat/pages/Dashboard'
 import Protected from '../features/auth/components/Protected'
+import { AuthBoot } from '../features/auth/components/AuthShell'
+
+const Dashboard = React.lazy(() => import('../features/chat/pages/Dashboard'))
+const Login = React.lazy(() => import('../features/auth/pages/Login'))
+const Register = React.lazy(() => import('../features/auth/pages/Register'))
+const PublicShare = React.lazy(() => import('../features/share/pages/PublicShare'))
+
+const load = (node, label) => (
+    <React.Suspense fallback={<AuthBoot label={label} />}>
+        {node}
+    </React.Suspense>
+)
 
 const routes = createBrowserRouter([
     {
         path: '/',
-        element: <Protected><Dashboard /></Protected>
+        element: <Protected>{load(<Dashboard />, 'Opening your desk')}</Protected>
     },
     {
         path: '/register',
-        element: <Register /> 
+        element: load(<Register />, 'Preparing the desk') 
     },
     {
         path: '/login',
-        element: <Login />
+        element: load(<Login />, 'Opening the reading room')
+    },
+    {
+        path: '/share/:shareId',
+        element: load(<PublicShare />, 'Opening shared report')
     },
 ]) 
 

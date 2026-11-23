@@ -6,7 +6,7 @@ import {
   useLocation,
   useNavigate,
 } from "react-router-dom";
-import { AlertCircle, ArrowRight, Eye, EyeOff } from "lucide-react";
+import { AlertCircle, ArrowRight, BookOpen, Eye, EyeOff } from "lucide-react";
 import AuthShell, { AuthBoot } from "../components/AuthShell";
 import { useAuth } from "../hook/useAuth";
 
@@ -15,13 +15,14 @@ const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 export default function LoginPage() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { handleLogin } = useAuth();
+  const { handleLogin, handleDemo } = useAuth();
 
   const user = useSelector((state) => state.auth.user);
   const loading = useSelector((state) => state.auth.loading);
 
   const [showPassword, setShowPassword] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [demoLoading, setDemoLoading] = useState(false);
   const [formError, setFormError] = useState("");
   const [fieldErrors, setFieldErrors] = useState({});
   const [loginData, setLoginData] = useState(() => ({
@@ -30,12 +31,13 @@ export default function LoginPage() {
   }));
 
   const notice = location.state?.registered;
+  const signedOut = location.state?.signedOut;
 
   if (user) {
     return <Navigate to="/" replace />;
   }
 
-  if (loading && !submitting) {
+  if (loading && !submitting && !demoLoading) {
     return <AuthBoot label="Checking your session" />;
   }
 
@@ -92,11 +94,25 @@ export default function LoginPage() {
     setFormError(result.message || "Sign in failed. Try again.");
   };
 
+  const handleDemoOpen = async () => {
+    setFormError("");
+    setDemoLoading(true);
+    const result = await handleDemo();
+    setDemoLoading(false);
+
+    if (result.ok) {
+      navigate("/", { replace: true });
+      return;
+    }
+
+    setFormError(result.message || "The demo desk could not be opened.");
+  };
+
   return (
     <AuthShell
       kicker="Return to the desk"
       title="Welcome back."
-      description="Sign in to reopen your threads, answers, and reading history."
+      description="Sign in to reopen your threads, answers, and reading history. Or step straight into the shared demo desk."
       footer={
         <>
           New to the desk?{" "}
@@ -104,12 +120,45 @@ export default function LoginPage() {
         </>
       }
     >
+      <div className="demo-open-wrap">
+        <button
+          type="button"
+          className="demo-open"
+          onClick={handleDemoOpen}
+          disabled={demoLoading || submitting}
+          aria-busy={demoLoading}
+        >
+          <span className="demo-open-icon" aria-hidden="true">
+            <BookOpen size={17} />
+          </span>
+          <span className="demo-open-copy">
+            <span className="demo-open-title">
+              {demoLoading ? "Opening the demo desk" : "Open the demo desk"}
+            </span>
+            <span className="demo-open-sub">
+              No verification · sample threads and sources included
+            </span>
+          </span>
+          <ArrowRight className="demo-open-arrow" size={15} aria-hidden="true" />
+        </button>
+      </div>
+
+      <p className="auth-divider">
+        <span>or sign in with email</span>
+      </p>
+
       <form
         className="auth-form"
         onSubmit={handleSubmit}
         aria-busy={submitting}
         noValidate
       >
+        {signedOut && (
+          <p className="form-notice" role="status">
+            You’ve been signed out. The session was revoked on the server.
+          </p>
+        )}
+
         {notice && (
           <p className="form-notice" role="status">
             Account created. Verify your email, then sign in.

@@ -1,19 +1,40 @@
 import { useCallback } from 'react'
 import { useDispatch } from 'react-redux'
-import { streamMessage, getChats, getMessages } from '../service/chat.api'
+import {
+    streamMessage,
+    getChats,
+    getMessages,
+    updateChat,
+    shareChat
+} from '../service/chat.api'
 
 import {
     createNewChat,
     addNewMessage,
     setMessages,
     setChats,
+    updateChatMeta,
+    removePendingUserMessage,
     setCurrentChatId,
     setLoading,
     setError,
+    setQuotaError,
     appendAiChunk,
     finalizeAiMessage,
     stopAiStreaming
 } from '../chat.slice'
+
+const errorMessage = (error) =>
+    error?.response?.data?.message ||
+    error?.response?.data?.error ||
+    error?.message ||
+    'Something went wrong.'
+
+const errorCode = (error) =>
+    error?.response?.data?.code || error?.code || null
+
+const errorStatus = (error) =>
+    error?.response?.status || error?.status || null
 
 const useChat = () => {
     const dispatch = useDispatch()
@@ -22,10 +43,13 @@ const useChat = () => {
         let streamChatId = chatId || null
         let streamCompleted = false
         let streamFailed = false
+        let quotaExceeded = false
+        let failureMessage = ""
 
         try {
             dispatch(setLoading(true))
             dispatch(setError(null))
+            dispatch(setQuotaError(null))
 
             const activeChatId = chatId || "temp"
             dispatch(addNewMessage({
@@ -91,10 +115,32 @@ const useChat = () => {
             }
         } catch (error) {
             console.error("Failed to send message:", error)
-            dispatch(setError(error?.response?.data?.error || error.message))
-            dispatch(stopAiStreaming({ chatId: streamChatId || chatId || "temp" }))
+
+            const status = errorStatus(error)
+            const code = errorCode(error)
+            const requestChatId = streamChatId || chatId || "temp"
+
+            dispatch(stopAiStreaming({ chatId: requestChatId }))
+
+            if (status === 429 || code === 'DAILY_QUOTA_EXCEEDED') {
+                // The answer never started, so do not leave an optimistic
+                // question stranded in a thread the server does not have.
+                quotaExceeded = true
+                failureMessage = errorMessage(error)
+                dispatch(removePendingUserMessage({ chatId: requestChatId }))
+                dispatch(setQuotaError(failureMessage))
+            } else {
+                failureMessage = errorMessage(error)
+                dispatch(setError(failureMessage))
+            }
         } finally {
             dispatch(setLoading(false))
+        }
+
+        return {
+            ok: streamCompleted,
+            quotaExceeded,
+            message: failureMessage
         }
     }
 
@@ -107,6 +153,10 @@ const useChat = () => {
                     _id: chat._id,
                     title: chat.title,
                     messages: [],
+                    pinned: Boolean(chat.pinned),
+                    shared: Boolean(chat.shared),
+                    shareId: chat.shareId || null,
+                    createdAt: chat.createdAt,
                     updatedAt: chat.updatedAt
                 }
                 return acc
@@ -139,7 +189,66 @@ const useChat = () => {
         }
     }
 
-    return { handleSendMessage, handleGetChats, handleOpenChats }
+    const handleRenameChat = async (chatId, title) => {
+        const cleanTitle = String(title || "").trim()
+        if (!chatId || !cleanTitle) return { ok: false }
+
+        try {
+            const data = await updateChat(chatId, { title: cleanTitle })
+            dispatch(updateChatMeta({
+                chatId,
+                patch: { title: data?.chat?.title || cleanTitle }
+            }))
+            return { ok: true }
+        } catch (error) {
+            dispatch(setError(errorMessage(error)))
+            return { ok: false, message: errorMessage(error) }
+        }
+    }
+
+    const handleTogglePin = async (chatId, pinned) => {
+        if (!chatId) return { ok: false }
+
+        // Optimistic: the rail reorders immediately, the server confirms.
+        dispatch(updateChatMeta({ chatId, patch: { pinned } }))
+
+        try {
+            await updateChat(chatId, { pinned })
+            return { ok: true }
+        } catch (error) {
+            dispatch(updateChatMeta({ chatId, patch: { pinned: !pinned } }))
+            dispatch(setError(errorMessage(error)))
+            return { ok: false, message: errorMessage(error) }
+        }
+    }
+
+    const handleShareChat = async (chatId) => {
+        if (!chatId) return { ok: false }
+
+        try {
+            const data = await shareChat(chatId)
+            dispatch(updateChatMeta({
+                chatId,
+                patch: {
+                    shared: Boolean(data?.shared),
+                    shareId: data?.shareId || null
+                }
+            }))
+            return { ok: true, ...data }
+        } catch (error) {
+            dispatch(setError(errorMessage(error)))
+            return { ok: false, message: errorMessage(error) }
+        }
+    }
+
+    return {
+        handleSendMessage,
+        handleGetChats,
+        handleOpenChats,
+        handleRenameChat,
+        handleTogglePin,
+        handleShareChat
+    }
 }
 
 export default useChat
