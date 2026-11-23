@@ -32,6 +32,11 @@ export const getMe = async () => {
     return response.data
 }
 
+export const getQuota = async () => {
+    const response = await api.get('/api/auth/quota')
+    return response.data
+}
+
 export const changePassword = async ({currentPassword, newPassword}) => {
     const response = await api.patch('/api/auth/password', {currentPassword, newPassword})
     return response.data

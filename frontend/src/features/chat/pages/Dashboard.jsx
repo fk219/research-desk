@@ -14,6 +14,7 @@ import {
 import Brand from "../../../components/Brand";
 import LegalLinks from "../../../components/LegalLinks";
 import { useAuth } from "../../auth/hook/useAuth";
+import { getQuota } from "../../auth/service/auth.api";
 import useChat from "../hook/useChat";
 import {
   setChats,
@@ -133,6 +134,7 @@ const Dashboard = () => {
   const [shareStatus, setShareStatus] = useState("idle");
   const [shareError, setShareError] = useState("");
   const [isSigningOut, setIsSigningOut] = useState(false);
+  const [quota, setQuota] = useState(null);
 
   const user = useSelector((state) => state.auth.user);
   const chats = useSelector((state) => state.chat.chats);
@@ -182,6 +184,20 @@ const Dashboard = () => {
   useEffect(() => {
     handleGetChats();
   }, [handleGetChats]);
+
+  useEffect(() => {
+    let active = true;
+
+    getQuota()
+      .then((data) => {
+        if (active && data?.quota) setQuota(data.quota);
+      })
+      .catch(() => {});
+
+    return () => {
+      active = false;
+    };
+  }, [messages.length, user?.id]);
 
   useEffect(() => {
     if (messages.length === 0 && !isSending) return;
@@ -263,6 +279,9 @@ const Dashboard = () => {
       // question back in the composer instead of losing the draft.
       if (result?.quotaExceeded) {
         setInputText((current) => (current.trim() ? current : trimmed));
+        setQuota((current) =>
+          current ? { ...current, remaining: 0 } : current,
+        );
       }
     } finally {
       setIsSending(false);
@@ -666,6 +685,7 @@ const Dashboard = () => {
                   onSubmit={() => handleSubmit()}
                   sending={isSending}
                   disabled={loading}
+                  quota={quota}
                   variant="hero"
                   inputRef={composerRef}
                   placeholder="Ask the first question…"
@@ -704,6 +724,7 @@ const Dashboard = () => {
                     onSubmit={() => handleSubmit()}
                     sending={isSending}
                     disabled={loading}
+                    quota={quota}
                     variant="hero"
                     inputRef={composerRef}
                     placeholder="What are you researching?"
@@ -754,6 +775,7 @@ const Dashboard = () => {
                   onSubmit={() => handleSubmit()}
                   sending={isSending}
                   disabled={loading}
+                  quota={quota}
                   variant="dock"
                   inputRef={composerRef}
                   placeholder={

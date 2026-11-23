@@ -11,7 +11,8 @@ import {
 import {
     changePasswordController,
     exportAccountController,
-    deleteAccountController
+    deleteAccountController,
+    quotaController
 } from '../controllers/account.controller.js'
 import { validateRegister, validateLogin } from '../validator/auth.validator.js'
 import { identifyUser } from '../middleware/auth.middleware.js'
@@ -25,6 +26,7 @@ authRouter.post('/login', validateLogin, loginController)
 authRouter.post('/demo', demoLimiter, demoLoginController)
 authRouter.post('/logout', logoutController)
 authRouter.get('/get-me', identifyUser, getMeController)
+authRouter.get('/quota', identifyUser, quotaController)
 authRouter.patch('/password', identifyUser, accountLimiter, changePasswordController)
 authRouter.get('/export', identifyUser, accountLimiter, exportAccountController)
 authRouter.delete('/account', identifyUser, accountLimiter, deleteAccountController)

@@ -9,6 +9,7 @@ const Composer = ({
   disabled = false,
   variant = "hero",
   inputRef,
+  quota = null,
   placeholder = "Ask anything…",
   notice = "",
   onDismissNotice,
@@ -50,6 +51,13 @@ const Composer = ({
         <label className="composer-label" htmlFor={labelId}>
           {variant === "dock" ? "Follow-up" : "Research query"}
         </label>
+        {quota ? (
+          <span className="composer-quota">
+            {quota.remaining > 0
+              ? `${quota.remaining} of ${quota.limit} questions left today`
+              : "Daily limit reached"}
+          </span>
+        ) : null}
       </div>
 
       <textarea

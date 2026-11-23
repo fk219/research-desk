@@ -2,6 +2,7 @@ import { userModel } from '../models/user.model.js'
 import { chatModel } from '../models/chat.model.js'
 import { messageModel } from '../models/message.model.js'
 import { DEMO_EMAIL } from '../services/demo.service.js'
+import { getDailyQuota } from '../services/quota.service.js'
 
 const isProduction = () => process.env.NODE_ENV === 'production'
 
@@ -171,8 +172,7 @@ const exportAccountController = async (req, res, next) => {
     }
 }
 
-const deleteAccountController = async (req, res, next) => {
-    try {
+const deleteAccountController = async (req, res, next) => {    try {
         // The shared demo identity is entered by every visitor, so it must
         // survive for the desk to keep working. The middleware already knows
         // the email, so reject before asking for a password.
@@ -239,8 +239,18 @@ const deleteAccountController = async (req, res, next) => {
     }
 }
 
+const quotaController = async (req, res, next) => {
+    try {
+        const quota = await getDailyQuota(req.user.id)
+        return res.status(200).json({ success: true, quota })
+    } catch (error) {
+        next(error)
+    }
+}
+
 export {
     changePasswordController,
     exportAccountController,
-    deleteAccountController
+    deleteAccountController,
+    quotaController
 }

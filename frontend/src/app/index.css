@@ -1005,6 +1005,14 @@ kbd {
   text-transform: uppercase;
 }
 
+.composer-quota {
+  color: var(--faint);
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
 .composer--hero .composer-label {
   color: var(--oxblood);
 }
