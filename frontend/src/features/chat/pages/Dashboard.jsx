@@ -3,7 +3,6 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import {
   AlertCircle,
-  ArrowUpRight,
   Check,
   Download,
   Link2,
@@ -723,7 +722,6 @@ const Dashboard = () => {
                         <span className="prompt-query">{suggestion.query}</span>
                         <span className="prompt-use">
                           Use prompt
-                          <ArrowUpRight size={11} aria-hidden="true" />
                         </span>
                       </button>
                     ))}
