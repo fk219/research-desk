@@ -418,7 +418,7 @@ const Dashboard = () => {
             type="button"
             className="brand-button"
             onClick={handleNewThread}
-            aria-label="Perplexity research desk: start new research"
+            aria-label="Research Desk: start new research"
           >
             <Brand />
           </button>

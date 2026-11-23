@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import Brand from "../../../components/Brand";
+import LegalLinks from "../../../components/LegalLinks";
 
 const AuthShell = ({ kicker, title, description, children, footer }) => (
   <div className="auth-page">
@@ -8,9 +9,9 @@ const AuthShell = ({ kicker, title, description, children, footer }) => (
         <Link
           to="/"
           className="auth-brand-link"
-          aria-label="Perplexity research desk"
+          aria-label="Research Desk"
         >
-          <Brand />
+          <Brand compact />
         </Link>
         <span className="auth-edition">Reading room</span>
       </div>
@@ -29,6 +30,8 @@ const AuthShell = ({ kicker, title, description, children, footer }) => (
       <p className="auth-note">
         Your threads and reading history stay with your account.
       </p>
+
+      <LegalLinks className="auth-legal" />
     </main>
   </div>
 );

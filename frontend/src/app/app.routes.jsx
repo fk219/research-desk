@@ -7,6 +7,8 @@ const Dashboard = React.lazy(() => import('../features/chat/pages/Dashboard'))
 const Login = React.lazy(() => import('../features/auth/pages/Login'))
 const Register = React.lazy(() => import('../features/auth/pages/Register'))
 const PublicShare = React.lazy(() => import('../features/share/pages/PublicShare'))
+const Privacy = React.lazy(() => import('../features/legal/pages/Privacy'))
+const Terms = React.lazy(() => import('../features/legal/pages/Terms'))
 
 const load = (node, label) => (
     <React.Suspense fallback={<AuthBoot label={label} />}>
@@ -30,6 +32,14 @@ const routes = createBrowserRouter([
     {
         path: '/share/:shareId',
         element: load(<PublicShare />, 'Opening shared report')
+    },
+    {
+        path: '/privacy',
+        element: load(<Privacy />, 'Opening privacy notice')
+    },
+    {
+        path: '/terms',
+        element: load(<Terms />, 'Opening terms of use')
     },
 ]) 
 

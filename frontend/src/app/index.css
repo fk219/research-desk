@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 /* ==========================================================================
-   Research desk — cool paper, ink, oxblood and citation teal
+   Research desk: cool paper, ink, oxblood and citation teal
    ========================================================================== */
 
 :root {
@@ -223,6 +223,75 @@ kbd {
   line-height: 1;
   text-transform: uppercase;
   white-space: nowrap;
+}
+
+/* --------------------------------------------------------------------------
+   Legal links and site footer
+   -------------------------------------------------------------------------- */
+
+.legal-links {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--faint);
+  font-family: var(--mono);
+  font-size: 8px;
+  letter-spacing: 0.1em;
+  line-height: 1.5;
+  text-transform: uppercase;
+}
+
+.legal-links a {
+  border-bottom: 1px solid transparent;
+  color: var(--muted);
+  text-decoration: none;
+  transition:
+    border-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.legal-links a:hover {
+  border-bottom-color: var(--oxblood);
+  color: var(--oxblood);
+}
+
+.legal-links-dot {
+  color: var(--hairline-strong);
+}
+
+.auth-legal {
+  display: flex;
+  justify-content: center;
+  margin-top: 10px;
+}
+
+.site-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px 18px;
+  padding: 18px 2px;
+  border-top: 1px solid var(--hairline);
+  color: var(--faint);
+  font-family: var(--mono);
+  font-size: 8px;
+  letter-spacing: 0.08em;
+  line-height: 1.5;
+  text-transform: uppercase;
+}
+
+.site-foot-brand {
+  color: var(--ink-soft);
+  font-family: var(--serif);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  text-transform: none;
+}
+
+.site-foot-note {
+  color: var(--faint);
 }
 
 /* --------------------------------------------------------------------------
@@ -679,10 +748,21 @@ kbd {
 .rail-foot {
   display: flex;
   flex: none;
-  align-items: flex-start;
-  gap: 8px;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 10px;
   padding: 12px 18px 14px;
   border-top: 1px solid var(--hairline);
+}
+
+.rail-foot-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.rail-legal {
+  padding-left: 13px;
 }
 
 .rail-sync-dot {
@@ -1451,7 +1531,7 @@ kbd {
   border-bottom: 0;
 }
 
-/* Numbered section markers — used when the API supplies no sources. */
+/* Numbered section markers used when the API supplies no sources. */
 
 .answer-body--numbered {
   padding-left: 3.15rem;
@@ -3098,6 +3178,132 @@ a.source-card:hover {
   background: var(--oxblood);
 }
 
+/* --------------------------------------------------------------------------
+   Legal pages
+   -------------------------------------------------------------------------- */
+
+.legal-page .legal-reader {
+  padding-top: 54px;
+  padding-bottom: 88px;
+}
+
+.legal-doc {
+  max-width: 720px;
+}
+
+.legal-title {
+  margin: 18px 0 14px;
+  color: var(--ink);
+  font-family: var(--serif);
+  font-size: clamp(2.45rem, 5vw, 3.6rem);
+  font-weight: 500;
+  letter-spacing: -0.035em;
+  line-height: 1.02;
+  text-wrap: balance;
+}
+
+.legal-summary {
+  max-width: 62ch;
+  margin: 0 0 18px;
+  color: var(--ink-soft);
+  font-size: 15px;
+  line-height: 1.7;
+}
+
+.legal-updated {
+  margin: 0;
+  padding-bottom: 22px;
+  border-bottom: 1px solid var(--hairline);
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 8.5px;
+  letter-spacing: 0.12em;
+  line-height: 1.5;
+  text-transform: uppercase;
+}
+
+.legal-body {
+  padding-top: 8px;
+}
+
+.legal-section {
+  padding-top: 26px;
+}
+
+.legal-section h2 {
+  margin: 0 0 10px;
+  color: var(--ink);
+  font-family: var(--serif);
+  font-size: clamp(1.35rem, 2.6vw, 1.65rem);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+.legal-section p {
+  margin: 0 0 12px;
+  color: var(--ink-soft);
+  font-size: 14px;
+  line-height: 1.75;
+}
+
+.legal-section ul {
+  margin: 0 0 14px;
+  padding-left: 18px;
+  color: var(--ink-soft);
+  font-size: 14px;
+  line-height: 1.7;
+  list-style: disc;
+}
+
+.legal-section li + li {
+  margin-top: 7px;
+}
+
+.legal-section li::marker {
+  color: var(--oxblood);
+}
+
+.legal-section strong {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.legal-section a {
+  color: var(--teal);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
+.legal-section a:hover {
+  color: var(--oxblood);
+}
+
+.legal-section code {
+  padding: 1px 4px;
+  border: 1px solid var(--hairline);
+  border-radius: 2px;
+  background: var(--card);
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 0.86em;
+}
+
+.legal-doc .memo-end {
+  margin-top: 34px;
+}
+
+.legal-reader .site-foot {
+  margin-top: 52px;
+}
+
+.public-foot {
+  flex: none;
+  padding: 12px 22px;
+  background: rgba(231, 233, 228, 0.9);
+}
+
 /* MVP responsive adjustments */
 
 @media (max-width: 900px) {
@@ -3128,6 +3334,18 @@ a.source-card:hover {
   .share-loading,
   .share-error {
     padding: 48px 30px;
+  }
+
+  .legal-page .legal-reader {
+    padding: 40px 24px 64px;
+  }
+
+  .legal-reader .site-foot {
+    margin-top: 38px;
+  }
+
+  .public-foot {
+    padding: 12px 16px;
   }
 }
 

@@ -1,13 +1,13 @@
-# Perplexity: Research Desk
+# Research Desk
 
-A research workspace for questions you intend to keep. Ask a question, the backend searches the live web with Tavily and reasons over the results with Groq (Mistral is a drop-in fallback), and the answer is filed as a reading note: sourced prose, a numbered source list, and a thread you can reopen, organise, export or share.
+Sourced answers you can keep. A research workspace for questions you intend to keep. Ask a question, the backend searches the live web with Tavily and reasons over the results with Groq (Mistral is a drop-in fallback), and the answer is filed as a reading note: sourced prose, a numbered source list, and a thread you can reopen, organise, export or share.
 
 The desk is built around one promise: **give me an answer I can keep, cite, share and verify.**
 
 **Live app:** https://perplexity.furqankhan.dev
 **API:** https://perplexity-clone-7nda.onrender.com
 
-![Perplexity Research Desk](docs/preview.png)
+![Research Desk research note](docs/preview.png)
 
 ![React](https://img.shields.io/badge/React-19-149ECA?logo=react&logoColor=white)
 ![Vite](https://img.shields.io/badge/Vite-7-646CFF?logo=vite&logoColor=white)

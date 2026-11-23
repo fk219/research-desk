@@ -10,6 +10,7 @@ import {
   X,
 } from "lucide-react";
 import { groupThreadsByDate } from "../utils/threadGroups";
+import LegalLinks from "../../../components/LegalLinks";
 
 const ResearchRail = ({
   chats,
@@ -325,8 +326,11 @@ const ResearchRail = ({
       </div>
 
       <div className="rail-foot">
-        <span className="rail-sync-dot" aria-hidden="true" />
-        <p>Pin a thread to keep it at the top. Rename inline from the index.</p>
+        <div className="rail-foot-note">
+          <span className="rail-sync-dot" aria-hidden="true" />
+          <p>Pin a thread to keep it at the top. Rename inline from the index.</p>
+        </div>
+        <LegalLinks className="rail-legal" />
       </div>
     </aside>
   );

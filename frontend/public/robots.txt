@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://perplexity.furqankhan.dev/sitemap.xml

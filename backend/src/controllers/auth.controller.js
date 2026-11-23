@@ -76,11 +76,11 @@ const registerController = async (req, res, next) => {
 
     await sendEmail(
         user.email,
-        "Welcome To Perplexity! Please Verify Your Email",
+        "Welcome to Research Desk! Please verify your email",
         `
             <div style="max-width:480px;margin:0 auto;font-family:'Segoe UI',Arial,sans-serif;background:#ffffff;border-radius:12px;overflow:hidden;border:1px solid #e5e7eb;">
                 <div style="background:linear-gradient(135deg,#84cc16,#10b981);padding:32px 24px;text-align:center;">
-                    <h1 style="margin:0;color:#ffffff;font-size:24px;font-weight:700;">Perplexity</h1>
+                    <h1 style="margin:0;color:#ffffff;font-size:24px;font-weight:700;">Research Desk</h1>
                 </div>
                 <div style="padding:32px 24px;text-align:center;">
                     <h2 style="margin:0 0 8px;color:#111827;font-size:20px;">Verify your email</h2>
@@ -239,7 +239,7 @@ const verifyEmailController = async (req, res, next) => {
             const html = `
                 <div style="max-width:480px;margin:50px auto;font-family:'Segoe UI',Arial,sans-serif;background:#ffffff;border-radius:12px;overflow:hidden;border:1px solid #e5e7eb;box-shadow:0 4px 6px -1px rgba(0,0,0,0.1);">
                     <div style="background:linear-gradient(135deg,#84cc16,#10b981);padding:32px 24px;text-align:center;">
-                        <h1 style="margin:0;color:#ffffff;font-size:24px;font-weight:700;">Perplexity</h1>
+                        <h1 style="margin:0;color:#ffffff;font-size:24px;font-weight:700;">Research Desk</h1>
                     </div>
                     <div style="padding:32px 24px;text-align:center;">
                         <h2 style="margin:0 0 8px;color:#111827;font-size:20px;">Email Already Verified</h2>
@@ -250,7 +250,7 @@ const verifyEmailController = async (req, res, next) => {
                         </a>
                     </div>
                     <div style="padding:16px 24px;text-align:center;border-top:1px solid #e5e7eb;">
-                        <p style="margin:0;color:#9ca3af;font-size:12px;">© Perplexity. All rights reserved.</p>
+                        <p style="margin:0;color:#9ca3af;font-size:12px;">© Research Desk. All rights reserved.</p>
                     </div>
                 </div>
             `
@@ -263,7 +263,7 @@ const verifyEmailController = async (req, res, next) => {
         const html = `
             <div style="max-width:480px;margin:50px auto;font-family:'Segoe UI',Arial,sans-serif;background:#ffffff;border-radius:12px;overflow:hidden;border:1px solid #e5e7eb;box-shadow:0 4px 6px -1px rgba(0,0,0,0.1);">
                 <div style="background:linear-gradient(135deg,#84cc16,#10b981);padding:32px 24px;text-align:center;">
-                    <h1 style="margin:0;color:#ffffff;font-size:24px;font-weight:700;">Perplexity</h1>
+                    <h1 style="margin:0;color:#ffffff;font-size:24px;font-weight:700;">Research Desk</h1>
                 </div>
                 <div style="padding:32px 24px;text-align:center;">
                     <h2 style="margin:0 0 8px;color:#111827;font-size:20px;">Email Verified Successfully</h2>
@@ -274,7 +274,7 @@ const verifyEmailController = async (req, res, next) => {
                     </a>
                 </div>
                 <div style="padding:16px 24px;text-align:center;border-top:1px solid #e5e7eb;">
-                    <p style="margin:0;color:#9ca3af;font-size:12px;">© Perplexity. All rights reserved.</p>
+                    <p style="margin:0;color:#9ca3af;font-size:12px;">© Research Desk. All rights reserved.</p>
                 </div>
             </div>
         `

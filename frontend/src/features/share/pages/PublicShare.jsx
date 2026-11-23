@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { ArrowUpRight, Lock } from "lucide-react";
 import Brand from "../../../components/Brand";
+import LegalLinks from "../../../components/LegalLinks";
 import { getPublicChat } from "../../chat/service/chat.api";
 import ThreadBody from "../../chat/components/ThreadBody";
 import { formatMemoDate } from "../../chat/utils/threadGroups";
@@ -12,7 +13,7 @@ const PublicTopbar = () => (
       <Link
         to="/login"
         className="brand-button"
-        aria-label="Perplexity research desk"
+        aria-label="Research Desk"
       >
         <Brand />
       </Link>
@@ -30,6 +31,14 @@ const PublicTopbar = () => (
       </Link>
     </div>
   </header>
+);
+
+const PublicFooter = () => (
+  <footer className="site-foot public-foot">
+    <span className="site-foot-brand">Research Desk</span>
+    <LegalLinks />
+    <span className="site-foot-note">Sourced answers you can keep.</span>
+  </footer>
 );
 
 const ShareCta = () => (
@@ -92,7 +101,7 @@ const PublicShare = () => {
     if (!thread?.title) return undefined;
 
     const previousTitle = document.title;
-    document.title = `${thread.title} · Shared research`;
+    document.title = `${thread.title} · Research Desk`;
 
     return () => {
       document.title = previousTitle;
@@ -114,6 +123,7 @@ const PublicShare = () => {
             <p>Opening the shared research note.</p>
           </div>
         </main>
+        <PublicFooter />
       </div>
     );
   }
@@ -143,6 +153,7 @@ const PublicShare = () => {
             </Link>
           </section>
         </main>
+        <PublicFooter />
       </div>
     );
   }
@@ -206,6 +217,7 @@ const PublicShare = () => {
           </div>
         </div>
       </main>
+      <PublicFooter />
     </div>
   );
 };
