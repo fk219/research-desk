@@ -19,6 +19,13 @@ const passwordLengthIsValid = (value) =>
 
 const changePasswordController = async (req, res, next) => {
     try {
+        if (req.user.email === DEMO_EMAIL) {
+            return res.status(403).json({
+                success: false,
+                message: "The shared demo account cannot change its password."
+            })
+        }
+
         const { currentPassword, newPassword } = req.body || {}
 
         // Registration and login trim passwords, so the change flow does the
