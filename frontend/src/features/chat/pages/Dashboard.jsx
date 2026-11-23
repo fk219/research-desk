@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   AlertCircle,
   Check,
@@ -8,9 +8,11 @@ import {
   Link2,
   LogOut,
   Menu,
+  Settings as SettingsIcon,
   Share2,
 } from "lucide-react";
 import Brand from "../../../components/Brand";
+import LegalLinks from "../../../components/LegalLinks";
 import { useAuth } from "../../auth/hook/useAuth";
 import useChat from "../hook/useChat";
 import {
@@ -443,6 +445,17 @@ const Dashboard = () => {
               )}
             </span>
           </div>
+
+          <LegalLinks className="account-legal" />
+
+          <Link
+            to="/settings"
+            className="account-settings"
+            aria-label="Account settings"
+          >
+            <SettingsIcon size={14} aria-hidden="true" />
+            <span className="account-settings-label">Settings</span>
+          </Link>
 
           <button
             type="button"

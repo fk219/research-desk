@@ -159,15 +159,28 @@ export default function Privacy() {
         </p>
       </section>
 
+      <section className="legal-section" aria-labelledby="privacy-export">
+        <h2 id="privacy-export">Exporting your data</h2>
+        <p>
+          The account settings page can download a JSON file containing your
+          account details, every thread and every message, including the source
+          cards attached to each answer. The export is generated on request and
+          never contains your password hash.
+        </p>
+      </section>
+
       <section className="legal-section" aria-labelledby="privacy-deletion">
         <h2 id="privacy-deletion">Deleting your account</h2>
         <p>
-          There is no self-serve account deletion control yet. Email{" "}
-          <a href="mailto:furqank219@gmail.com">furqank219@gmail.com</a> from the
-          address on the account and ask for deletion. The account record, its
-          threads, messages, and public share links will be deleted. The aim is
-          to complete deletion within 30 days. You can delete individual threads
+          You can delete your account from the account settings page. Deletion
+          removes the account record, its threads, messages, and every public
+          share link. It cannot be undone. You can delete individual threads
           yourself at any time from the research rail.
+        </p>
+        <p>
+          If you cannot sign in, email{" "}
+          <a href="mailto:furqank219@gmail.com">furqank219@gmail.com</a> from the
+          address on the account and ask for deletion.
         </p>
       </section>
 

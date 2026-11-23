@@ -1,6 +1,7 @@
 
 Features:
 -Authentication System (verified email, JWT cookie, token-version revocation)
+-Account settings (password change with full session revocation, JSON data export, account deletion with thread and message cleanup)
 -Chat with AI (Mistral + Tavily search)
 -Chat History
 -Message Storage with source cards
@@ -19,7 +20,7 @@ DATA MODELLING:
     email,
     password,
     verified: yes or no,
-    tokenVersion: number (incremented on logout),
+    tokenVersion: number (incremented on logout and password change),
     createdAt,
     updatedAt,
 }

@@ -19,6 +19,7 @@ const serializeUser = (user) => ({
     username: user.username,
     email: user.email,
     verified: user.verified,
+    joinedAt: user.createdAt || null,
     isDemo: user.email === DEMO_EMAIL
 })
 

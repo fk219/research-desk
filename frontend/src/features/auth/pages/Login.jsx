@@ -32,6 +32,8 @@ export default function LoginPage() {
 
   const notice = location.state?.registered;
   const signedOut = location.state?.signedOut;
+  const passwordChanged = location.state?.passwordChanged;
+  const accountDeleted = location.state?.accountDeleted;
 
   if (user) {
     return <Navigate to="/" replace />;
@@ -153,9 +155,23 @@ export default function LoginPage() {
         aria-busy={submitting}
         noValidate
       >
-        {signedOut && (
+        {signedOut && !passwordChanged && !accountDeleted && (
           <p className="form-notice" role="status">
             You’ve been signed out. The session was revoked on the server.
+          </p>
+        )}
+
+        {passwordChanged && (
+          <p className="form-notice" role="status">
+            Password changed. Every session was signed out. Sign in again with
+            your new password.
+          </p>
+        )}
+
+        {accountDeleted && (
+          <p className="form-notice" role="status">
+            Account deleted. Your threads, messages and public share links were
+            removed.
           </p>
         )}
 

@@ -3388,3 +3388,460 @@ a.source-card:hover {
   }
 }
 
+/* --------------------------------------------------------------------------
+   Account settings
+   -------------------------------------------------------------------------- */
+
+.account-legal {
+  padding-right: 2px;
+}
+
+.account-settings {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 30px;
+  padding: 0 9px;
+  border: 1px solid transparent;
+  border-radius: 2px;
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 8.5px;
+  letter-spacing: 0.1em;
+  text-decoration: none;
+  text-transform: uppercase;
+  transition:
+    color 0.15s ease,
+    border-color 0.15s ease,
+    background-color 0.15s ease;
+}
+
+.account-settings:hover {
+  border-color: var(--hairline);
+  background: var(--card);
+  color: var(--oxblood);
+}
+
+.settings-page .topbar-actions {
+  gap: 12px;
+}
+
+.settings-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 30px;
+  padding: 0 9px;
+  border: 1px solid var(--hairline);
+  border-radius: 2px;
+  background: var(--card);
+  color: var(--ink-soft);
+  font-family: var(--mono);
+  font-size: 8.5px;
+  letter-spacing: 0.1em;
+  text-decoration: none;
+  text-transform: uppercase;
+  transition:
+    color 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.settings-back:hover {
+  border-color: var(--oxblood);
+  color: var(--oxblood);
+}
+
+.settings-reader {
+  padding-top: 54px;
+  padding-bottom: 88px;
+}
+
+.settings-doc {
+  max-width: 740px;
+}
+
+.settings-title {
+  margin: 18px 0 14px;
+  color: var(--ink);
+  font-family: var(--serif);
+  font-size: clamp(2.45rem, 5vw, 3.6rem);
+  font-weight: 500;
+  letter-spacing: -0.035em;
+  line-height: 1.02;
+  text-wrap: balance;
+}
+
+.settings-lede {
+  max-width: 62ch;
+  margin: 0 0 16px;
+  color: var(--ink-soft);
+  font-size: 15px;
+  line-height: 1.7;
+}
+
+.settings-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  padding-top: 14px;
+}
+
+.settings-panel {
+  padding: 26px 28px;
+  border: 1px solid var(--hairline);
+  border-top: 2px solid var(--ink);
+  border-radius: 2px;
+  background: var(--card);
+  box-shadow: 0 24px 50px -48px rgba(21, 24, 27, 0.62);
+}
+
+.settings-summary {
+  border-top-color: var(--oxblood);
+}
+
+.settings-panel--danger {
+  border-color: var(--danger-line);
+  border-top-color: var(--oxblood);
+  background: var(--card);
+}
+
+.settings-summary-head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.settings-avatar {
+  width: 42px;
+  height: 42px;
+  font-size: 12px;
+}
+
+.settings-kicker {
+  margin: 0;
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 8px;
+  letter-spacing: 0.18em;
+  line-height: 1.5;
+  text-transform: uppercase;
+}
+
+.settings-panel-title {
+  margin: 5px 0 0;
+  color: var(--ink);
+  font-family: var(--serif);
+  font-size: clamp(1.45rem, 3vw, 1.8rem);
+  font-weight: 500;
+  letter-spacing: -0.025em;
+  line-height: 1.15;
+}
+
+.settings-panel--danger .settings-panel-title {
+  color: var(--oxblood-deep);
+}
+
+.settings-panel-copy {
+  max-width: 62ch;
+  margin: 10px 0 0;
+  color: var(--muted);
+  font-size: 12.5px;
+  line-height: 1.65;
+}
+
+.settings-facts {
+  margin: 22px 0 0;
+  border-top: 1px solid var(--hairline);
+}
+
+.settings-fact {
+  display: grid;
+  grid-template-columns: 140px minmax(0, 1fr);
+  gap: 14px;
+  align-items: baseline;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--hairline);
+}
+
+.settings-fact dt {
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 8px;
+  letter-spacing: 0.14em;
+  line-height: 1.6;
+  text-transform: uppercase;
+}
+
+.settings-fact dd {
+  min-width: 0;
+  margin: 0;
+  color: var(--ink);
+  font-size: 13.5px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.settings-fact-break {
+  word-break: break-word;
+}
+
+.settings-state {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 7px;
+  border: 1px solid var(--hairline);
+  border-radius: 2px;
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 8px;
+  letter-spacing: 0.08em;
+  line-height: 1.5;
+  text-transform: uppercase;
+}
+
+.settings-state::before {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: currentColor;
+  content: "";
+}
+
+.settings-state[data-state="verified"] {
+  border-color: #c6d8d2;
+  background: var(--teal-wash);
+  color: var(--teal);
+}
+
+.settings-state[data-state="pending"] {
+  border-color: var(--danger-line);
+  background: var(--danger-wash);
+  color: var(--oxblood);
+}
+
+.settings-policy {
+  margin: 16px 0 0;
+  color: var(--faint);
+  font-family: var(--mono);
+  font-size: 8px;
+  letter-spacing: 0.03em;
+  line-height: 1.7;
+}
+
+.settings-policy a {
+  border-bottom: 1px solid var(--hairline-strong);
+  color: var(--muted);
+  text-decoration: none;
+}
+
+.settings-policy a:hover {
+  border-bottom-color: var(--oxblood);
+  color: var(--oxblood);
+}
+
+.settings-form {
+  margin-top: 20px;
+}
+
+.settings-form .field:first-of-type {
+  margin-top: 0;
+}
+
+.settings-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 14px;
+  margin-top: 20px;
+}
+
+.settings-actions--split {
+  justify-content: space-between;
+}
+
+.settings-reveal {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 0;
+  border-bottom: 1px solid transparent;
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 8px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  transition:
+    border-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.settings-reveal:hover {
+  border-bottom-color: var(--oxblood);
+  color: var(--oxblood);
+}
+
+.settings-submit {
+  width: auto;
+  min-width: 176px;
+  height: 38px;
+  margin-top: 0;
+  padding: 0 20px;
+}
+
+.settings-action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 38px;
+  padding: 0 16px;
+  border: 1px solid var(--ink);
+  border-radius: 2px;
+  background: transparent;
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 8.5px;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+  transition:
+    color 0.15s ease,
+    border-color 0.15s ease,
+    background-color 0.15s ease;
+}
+
+.settings-action-btn:hover:not(:disabled) {
+  border-color: var(--oxblood);
+  background: var(--oxblood);
+  color: #f7f8f5;
+}
+
+.settings-action-btn:disabled {
+  cursor: wait;
+  opacity: 0.6;
+}
+
+.settings-danger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 38px;
+  padding: 0 18px;
+  border: 1px solid var(--oxblood);
+  border-radius: 2px;
+  background: var(--oxblood);
+  color: #f7f8f5;
+  font-family: var(--mono);
+  font-size: 8.5px;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.settings-danger:hover:not(:disabled) {
+  border-color: var(--oxblood-deep);
+  background: var(--oxblood-deep);
+}
+
+.settings-danger:disabled {
+  cursor: wait;
+  opacity: 0.68;
+}
+
+.settings-demo-note {
+  margin: 18px 0 0;
+  padding: 12px 14px;
+  border: 1px solid var(--danger-line);
+  border-left: 3px solid var(--oxblood);
+  border-radius: 2px;
+  background: var(--danger-wash);
+  color: #592a26;
+  font-size: 12px;
+  line-height: 1.65;
+}
+
+.settings-form-status {
+  margin-top: 16px;
+  margin-bottom: 0;
+}
+
+.field-input--mono {
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.12em;
+}
+
+.settings-foot {
+  margin-top: 52px;
+}
+
+@media (max-width: 1180px) {
+  .account-legal {
+    display: none;
+  }
+}
+
+@media (max-width: 900px) {
+  .account-settings {
+    width: 32px;
+    justify-content: center;
+    padding: 0;
+    border-color: transparent;
+  }
+
+  .account-settings-label {
+    display: none;
+  }
+}
+
+@media (max-width: 760px) {
+  .settings-reader {
+    padding: 40px 24px 64px;
+  }
+
+  .settings-panel {
+    padding: 22px 20px;
+  }
+
+  .settings-foot {
+    margin-top: 38px;
+  }
+}
+
+@media (max-width: 620px) {
+  .settings-fact {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 3px;
+  }
+
+  .settings-actions--split {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+
+  .settings-submit,
+  .settings-action-btn,
+  .settings-danger {
+    width: 100%;
+  }
+
+  .settings-reveal {
+    align-self: flex-start;
+  }
+}
+
+@media (max-width: 420px) {
+  .settings-back span {
+    display: none;
+  }
+
+  .settings-back {
+    width: 32px;
+    justify-content: center;
+    padding: 0;
+  }
+}
+

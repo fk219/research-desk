@@ -30,4 +30,32 @@ export const logout = async () => {
 export const getMe = async () => {
     const response = await api.get('/api/auth/get-me')
     return response.data
+}
+
+export const changePassword = async ({currentPassword, newPassword}) => {
+    const response = await api.patch('/api/auth/password', {currentPassword, newPassword})
+    return response.data
+}
+
+export const deleteAccount = async ({password}) => {
+    const response = await api.delete('/api/auth/account', {data: {password}})
+    return response.data
+}
+
+export const exportAccount = async () => {
+    const response = await fetch(`${API_ORIGIN}/api/auth/export`, {
+        method: 'GET',
+        credentials: 'include'
+    })
+
+    if (!response.ok) {
+        const payload = await response.json().catch(() => ({}))
+        const error = new Error(
+            payload.message || payload.error || 'The export could not be prepared.'
+        )
+        error.response = {data: payload, status: response.status}
+        throw error
+    }
+
+    return response.blob()
 } 

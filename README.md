@@ -30,6 +30,7 @@ Core capabilities:
 - **Markdown export.** Download the question, answer, and numbered sources with URLs as a portable `.md` file.
 - **Demo access.** One click opens a shared demo desk with seeded example threads. No email verification required.
 - **Real logout.** Logout increments the user's `tokenVersion`, revoking every JWT issued before that moment, and clears the cookie.
+- **Account settings.** Change the password (which revokes every session), download a JSON export of the account and its research threads, or delete the account and every thread, message and public share link with it.
 - **Abuse limits.** 25 answered questions per user per UTC day, plus per-IP rate limits on auth and message sends.
 
 ## Demo access
@@ -108,7 +109,7 @@ backend/
   src/
     app.js                     Express app, CORS, helmet, rate limits
     routes/                    auth, chat, public share
-    controllers/               auth, demo/logout, chats, messages, shares
+    controllers/               auth, account settings, chats, messages, shares
     middleware/                identifyUser, rate limiters
     services/
       ai.services.js           Groq client (Mistral fallback) + source-capturing search tool
@@ -120,6 +121,7 @@ frontend/
   src/
     app/                       store, routes, global styles
     features/auth/             auth pages, demo entry, hook, API client, guard
+    features/account/          protected settings page, password, export and deletion
     features/chat/             dashboard, rail, composer, answer block, export helper
     features/share/            public read-only report (lazy-loaded route)
     components/Brand.jsx
@@ -168,6 +170,9 @@ The demo desk needs only a working `MONGO_URI` and `JWT_SECRET`; the live answer
 | `POST` | `/api/auth/demo` | Public | Open the shared demo desk (3/min per IP) |
 | `POST` | `/api/auth/logout` | Cookie (best effort) | Increment `tokenVersion`, clear cookie |
 | `GET` | `/api/auth/get-me` | Cookie | Current user |
+| `PATCH` | `/api/auth/password` | Cookie | Change password, revoke all sessions (8 to 72 characters) |
+| `GET` | `/api/auth/export` | Cookie | Download account, threads and messages with sources as JSON |
+| `DELETE` | `/api/auth/account` | Cookie | Delete the account, its threads, messages and share links |
 | `POST` | `/api/chats/message` | Cookie | Ask a question (SSE when `stream: true`) |
 | `GET` | `/api/chats` | Cookie | List threads, pinned first |
 | `GET` | `/api/chats/:chatId/messages` | Cookie | Load a thread |
@@ -179,7 +184,7 @@ The demo desk needs only a working `MONGO_URI` and `JWT_SECRET`; the live answer
 ## Deployment notes
 
 - The API runs on Render's free plan, so the first request after idle can take ~50 seconds.
-- CORS is restricted to the production app URL plus localhost; `PATCH` is allowed for thread updates.
+- CORS is restricted to the production app URL plus localhost; `PATCH` and `DELETE` are allowed for account and thread changes.
 - Verification emails need a Gmail app password, not the account password.
 - `frontend/vercel.json` rewrites client routes to `index.html`, so `/share/:shareId` resolves to the SPA.
 - Set `FRONTEND_URL` (or `SHARE_BASE_URL`) to the public web origin so share responses return usable URLs. The frontend copies the current origin's `/share/:shareId` link regardless.

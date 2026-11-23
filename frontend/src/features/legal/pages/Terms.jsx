@@ -78,8 +78,8 @@ export default function Terms() {
           Access may be suspended or removed if these terms are broken, if the
           service is abused, or for security, legal, or operational reasons.
           Accounts may also be removed when the beta ends. You can stop using the
-          desk at any time, delete your threads from the research rail, or ask
-          for account deletion as described in the privacy notice.
+          desk at any time, delete your threads from the research rail, or delete
+          your account and all of its data from the account settings page.
         </p>
       </section>
 

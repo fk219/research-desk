@@ -116,6 +116,13 @@ export const useAuth = () => {
     }
   }, [dispatch]);
 
+  const handleLocalSignOut = useCallback(() => {
+    setSessionEnded(true);
+    dispatch(setUser(null));
+    dispatch(setError(null));
+    dispatch(setLoading(false));
+  }, [dispatch]);
+
   const handleLogout = useCallback(async () => {
     // Revoke the server-side session first, then clear the local desk. The
     // local state is cleared even if the request fails or the cookie is gone.
@@ -125,12 +132,9 @@ export const useAuth = () => {
       // Nothing else to do: the UI must not stay in a signed-in state.
     }
 
-    setSessionEnded(true);
-    dispatch(setUser(null));
-    dispatch(setError(null));
-    dispatch(setLoading(false));
+    handleLocalSignOut();
     return { ok: true };
-  }, [dispatch]);
+  }, [handleLocalSignOut]);
 
   return {
     handleRegister,
@@ -138,5 +142,6 @@ export const useAuth = () => {
     handleDemo,
     handleGetMe,
     handleLogout,
+    handleLocalSignOut,
   };
 };

@@ -19,6 +19,18 @@ const authLimiter = rateLimit({
     )
 })
 
+// Account changes are rarer and more sensitive than ordinary reads, so this
+// sits on top of the auth limiter applied to the whole router.
+const accountLimiter = rateLimit({
+    windowMs: 60 * 1000,
+    limit: 6,
+    standardHeaders: "draft-7",
+    legacyHeaders: false,
+    handler: rateLimitHandler(
+        "Too many account requests from this address. Wait a minute and try again."
+    )
+})
+
 // The demo endpoint is stricter because it creates a shared session.
 const demoLimiter = rateLimit({
     windowMs: 60 * 1000,
@@ -41,4 +53,4 @@ const messageLimiter = rateLimit({
     )
 })
 
-export { authLimiter, demoLimiter, messageLimiter }
+export { authLimiter, accountLimiter, demoLimiter, messageLimiter }

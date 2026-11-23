@@ -6,6 +6,7 @@ import { AuthBoot } from '../features/auth/components/AuthShell'
 const Dashboard = React.lazy(() => import('../features/chat/pages/Dashboard'))
 const Login = React.lazy(() => import('../features/auth/pages/Login'))
 const Register = React.lazy(() => import('../features/auth/pages/Register'))
+const Settings = React.lazy(() => import('../features/account/pages/Settings'))
 const PublicShare = React.lazy(() => import('../features/share/pages/PublicShare'))
 const Privacy = React.lazy(() => import('../features/legal/pages/Privacy'))
 const Terms = React.lazy(() => import('../features/legal/pages/Terms'))
@@ -20,6 +21,10 @@ const routes = createBrowserRouter([
     {
         path: '/',
         element: <Protected>{load(<Dashboard />, 'Opening your desk')}</Protected>
+    },
+    {
+        path: '/settings',
+        element: <Protected>{load(<Settings />, 'Opening account settings')}</Protected>
     },
     {
         path: '/register',

@@ -48,7 +48,7 @@ const LegalShell = ({ kicker, title, summary, children }) => {
               </h1>
 
               <p className="legal-summary">{summary}</p>
-              <p className="legal-updated">Last updated 23 November 2026</p>
+              <p className="legal-updated">Last updated 24 November 2026</p>
 
               <div className="legal-body">{children}</div>
 
