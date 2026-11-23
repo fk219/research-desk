@@ -1,0 +1,145 @@
+import { useCallback } from 'react'
+import { useDispatch } from 'react-redux'
+import { streamMessage, getChats, getMessages } from '../service/chat.api'
+
+import {
+    createNewChat,
+    addNewMessage,
+    setMessages,
+    setChats,
+    setCurrentChatId,
+    setLoading,
+    setError,
+    appendAiChunk,
+    finalizeAiMessage,
+    stopAiStreaming
+} from '../chat.slice'
+
+const useChat = () => {
+    const dispatch = useDispatch()
+
+    const handleSendMessage = async ({ message, chatId }) => {
+        let streamChatId = chatId || null
+        let streamCompleted = false
+        let streamFailed = false
+
+        try {
+            dispatch(setLoading(true))
+            dispatch(setError(null))
+
+            const activeChatId = chatId || "temp"
+            dispatch(addNewMessage({
+                chatId: activeChatId,
+                message: { role: "user", content: message }
+            }))
+
+            if (!chatId) dispatch(setCurrentChatId("temp"))
+
+            await streamMessage({
+                message,
+                chatId,
+                onEvent: (event) => {
+                    if (event.type === 'start' && event.newChat) {
+                        streamChatId = event.newChat._id
+                        dispatch(createNewChat({
+                            chatId: event.newChat._id,
+                            title: event.title || event.newChat.title
+                        }))
+                        dispatch(setMessages({
+                            chatId: event.newChat._id,
+                            messages: [event.userMessage]
+                        }))
+                        dispatch(setCurrentChatId(event.newChat._id))
+                    }
+
+                    if (event.type === 'chunk') {
+                        streamChatId = event.chatId || streamChatId
+                        dispatch(appendAiChunk({
+                            chatId: event.chatId || chatId,
+                            chunk: event.chunk
+                        }))
+                    }
+
+                    if (event.type === 'done') {
+                        streamChatId = event.message?.chat || streamChatId
+                        streamCompleted = true
+                        dispatch(finalizeAiMessage({
+                            chatId: event.message.chat,
+                            message: event.message
+                        }))
+                        dispatch(setLoading(false))
+                    }
+
+                    if (event.type === 'error') {
+                        streamFailed = true
+                        dispatch(setError(event.error || 'The answer stream stopped unexpectedly.'))
+                        dispatch(stopAiStreaming({ chatId: streamChatId || activeChatId }))
+                        dispatch(setLoading(false))
+                    }
+
+                    if (event.type === 'start' && event.chatId) {
+                        streamChatId = event.chatId
+                    }
+                }
+            })
+
+            // A dropped SSE connection can end the reader without a done event.
+            // Surface it instead of leaving a permanently "composing" answer.
+            if (!streamCompleted && !streamFailed) {
+                dispatch(setError('The answer stream ended before it finished. Ask again.'))
+                dispatch(stopAiStreaming({ chatId: streamChatId || activeChatId }))
+            }
+        } catch (error) {
+            console.error("Failed to send message:", error)
+            dispatch(setError(error?.response?.data?.error || error.message))
+            dispatch(stopAiStreaming({ chatId: streamChatId || chatId || "temp" }))
+        } finally {
+            dispatch(setLoading(false))
+        }
+    }
+
+    const handleGetChats = useCallback(async () => {
+        try {
+            dispatch(setLoading(true))
+            const data = await getChats()
+            const chatsMap = (data?.chats || []).reduce((acc, chat) => {
+                acc[chat._id] = {
+                    _id: chat._id,
+                    title: chat.title,
+                    messages: [],
+                    updatedAt: chat.updatedAt
+                }
+                return acc
+            }, {})
+            dispatch(setChats(chatsMap))
+        } catch (error) {
+            console.error("Failed to fetch chats:", error)
+            dispatch(setError(error?.response?.data?.error || error.message))
+        } finally {
+            dispatch(setLoading(false))
+        }
+    }, [dispatch])
+
+    const handleOpenChats = async (chatId, chats) => {
+        dispatch(setCurrentChatId(chatId))
+        if (chats && chats[chatId]?.messages?.length > 0) return
+
+        try {
+            dispatch(setLoading(true))
+            const data = await getMessages(chatId)
+            dispatch(setMessages({
+                chatId,
+                messages: data?.messages || []
+            }))
+        } catch (error) {
+            console.error("Failed to fetch chat messages:", error)
+            dispatch(setError(error?.response?.data?.error || error.message))
+        } finally {
+            dispatch(setLoading(false))
+        }
+    }
+
+    return { handleSendMessage, handleGetChats, handleOpenChats }
+}
+
+export default useChat

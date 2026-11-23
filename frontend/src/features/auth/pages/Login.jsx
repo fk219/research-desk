@@ -1,0 +1,221 @@
+import { useState } from "react";
+import { useSelector } from "react-redux";
+import {
+  Link,
+  Navigate,
+  useLocation,
+  useNavigate,
+} from "react-router-dom";
+import { AlertCircle, ArrowRight, Eye, EyeOff } from "lucide-react";
+import AuthShell, { AuthBoot } from "../components/AuthShell";
+import { useAuth } from "../hook/useAuth";
+
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+export default function LoginPage() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { handleLogin } = useAuth();
+
+  const user = useSelector((state) => state.auth.user);
+  const loading = useSelector((state) => state.auth.loading);
+
+  const [showPassword, setShowPassword] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [formError, setFormError] = useState("");
+  const [fieldErrors, setFieldErrors] = useState({});
+  const [loginData, setLoginData] = useState(() => ({
+    email: location.state?.email || "",
+    password: "",
+  }));
+
+  const notice = location.state?.registered;
+
+  if (user) {
+    return <Navigate to="/" replace />;
+  }
+
+  if (loading && !submitting) {
+    return <AuthBoot label="Checking your session" />;
+  }
+
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+    setLoginData((previous) => ({ ...previous, [name]: value }));
+    setFormError("");
+
+    if (fieldErrors[name]) {
+      setFieldErrors((previous) => {
+        const next = { ...previous };
+        delete next[name];
+        return next;
+      });
+    }
+  };
+
+  const validate = () => {
+    const errors = {};
+
+    if (!loginData.email.trim()) {
+      errors.email = "Enter your email address.";
+    } else if (!EMAIL_PATTERN.test(loginData.email.trim())) {
+      errors.email = "That email address doesn't look right.";
+    }
+
+    if (!loginData.password) {
+      errors.password = "Enter your password.";
+    }
+
+    return errors;
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    setFormError("");
+
+    const errors = validate();
+    setFieldErrors(errors);
+    if (Object.keys(errors).length > 0) return;
+
+    setSubmitting(true);
+    const result = await handleLogin({
+      email: loginData.email.trim(),
+      password: loginData.password,
+    });
+    setSubmitting(false);
+
+    if (result.ok) {
+      navigate("/", { replace: true });
+      return;
+    }
+
+    setFormError(result.message || "Sign in failed. Try again.");
+  };
+
+  return (
+    <AuthShell
+      kicker="Return to the desk"
+      title="Welcome back."
+      description="Sign in to reopen your threads, answers, and reading history."
+      footer={
+        <>
+          New to the desk?{" "}
+          <Link to="/register">Create an account</Link>
+        </>
+      }
+    >
+      <form
+        className="auth-form"
+        onSubmit={handleSubmit}
+        aria-busy={submitting}
+        noValidate
+      >
+        {notice && (
+          <p className="form-notice" role="status">
+            Account created. Verify your email, then sign in.
+          </p>
+        )}
+
+        {formError && (
+          <div className="form-error" role="alert">
+            <AlertCircle size={14} aria-hidden="true" />
+            <span>{formError}</span>
+          </div>
+        )}
+
+        <div className="field">
+          <label className="field-label" htmlFor="login-email">
+            Email
+          </label>
+          <div className="field-input-wrap">
+            <input
+              id="login-email"
+              className="field-input"
+              type="email"
+              name="email"
+              value={loginData.email}
+              onChange={handleChange}
+              placeholder="name@example.com"
+              autoComplete="email"
+              required
+              disabled={submitting}
+              aria-invalid={Boolean(fieldErrors.email)}
+              aria-describedby={
+                fieldErrors.email ? "login-email-error" : undefined
+              }
+            />
+          </div>
+          {fieldErrors.email && (
+            <p className="field-error" id="login-email-error" role="alert">
+              {fieldErrors.email}
+            </p>
+          )}
+        </div>
+
+        <div className="field">
+          <label className="field-label" htmlFor="login-password">
+            Password
+          </label>
+          <div className="field-input-wrap">
+            <input
+              id="login-password"
+              className="field-input field-input--password"
+              type={showPassword ? "text" : "password"}
+              name="password"
+              value={loginData.password}
+              onChange={handleChange}
+              placeholder="••••••••"
+              autoComplete="current-password"
+              required
+              disabled={submitting}
+              aria-invalid={Boolean(fieldErrors.password)}
+              aria-describedby={
+                fieldErrors.password ? "login-password-error" : undefined
+              }
+            />
+            <button
+              type="button"
+              className="password-toggle"
+              onClick={() => setShowPassword((visible) => !visible)}
+              aria-label={showPassword ? "Hide password" : "Show password"}
+            >
+              {showPassword ? (
+                <EyeOff size={14} aria-hidden="true" />
+              ) : (
+                <Eye size={14} aria-hidden="true" />
+              )}
+            </button>
+          </div>
+          {fieldErrors.password && (
+            <p className="field-error" id="login-password-error" role="alert">
+              {fieldErrors.password}
+            </p>
+          )}
+        </div>
+
+        <button
+          type="submit"
+          className="auth-submit"
+          disabled={submitting}
+          aria-busy={submitting}
+        >
+          {submitting ? (
+            <>
+              <span>Signing in</span>
+              <span className="auth-submit-dots" aria-hidden="true">
+                <span />
+                <span />
+                <span />
+              </span>
+            </>
+          ) : (
+            <>
+              <span>Sign in</span>
+              <ArrowRight size={14} aria-hidden="true" />
+            </>
+          )}
+        </button>
+      </form>
+    </AuthShell>
+  );
+}
