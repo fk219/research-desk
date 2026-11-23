@@ -1,6 +1,6 @@
 # Perplexity: Research Desk
 
-A research workspace for questions you intend to keep. Ask a question, the backend searches the live web with Tavily and reasons over the results with Mistral, and the answer is filed as a reading note: sourced prose, a numbered source list, and a thread you can reopen, organise, export or share.
+A research workspace for questions you intend to keep. Ask a question, the backend searches the live web with Tavily and reasons over the results with Groq (Mistral is a drop-in fallback), and the answer is filed as a reading note: sourced prose, a numbered source list, and a thread you can reopen, organise, export or share.
 
 The desk is built around one promise: **give me an answer I can keep, cite, share and verify.**
 
@@ -13,7 +13,7 @@ The desk is built around one promise: **give me an answer I can keep, cite, shar
 ![Vite](https://img.shields.io/badge/Vite-7-646CFF?logo=vite&logoColor=white)
 ![Node](https://img.shields.io/badge/Node.js-22-5FA04E?logo=node.js&logoColor=white)
 ![MongoDB](https://img.shields.io/badge/MongoDB-Mongoose-47A248?logo=mongodb&logoColor=white)
-![Mistral](https://img.shields.io/badge/Mistral-tool--calling-FF7000)
+![Groq](https://img.shields.io/badge/Groq-tool--calling-F55036)
 ![Render](https://img.shields.io/badge/API-Render-46E3B7)
 ![Vercel](https://img.shields.io/badge/Web-Vercel-000000?logo=vercel&logoColor=white)
 
@@ -51,7 +51,7 @@ Client (React + Redux)  ──POST /api/chats/message──►  Express API
                                                         │
                                                         ├─ daily quota check (25/user/UTC day)
                                                         ▼
-                                              Mistral + tool calling
+                                              Groq + tool calling
                                                    │
                                       search_internet(query)
                                                    │
@@ -95,7 +95,7 @@ Quota and rate-limit failures return HTTP `429` with a JSON `message` and `code`
 | Frontend | React 19, Vite, Redux Toolkit, react-router-dom, react-markdown, lucide-react |
 | Backend | Node.js, Express 5, Mongoose, JWT, bcrypt, cookie-parser, morgan |
 | Security | helmet, express-rate-limit, httpOnly session cookie, token-version revocation |
-| AI | Mistral Small via `@langchain/mistralai` |
+| AI | Groq (`openai/gpt-oss-120b`) via `@langchain/groq`; Mistral Small optional fallback |
 | Search | Tavily (`@tavily/core`) |
 | Email | Nodemailer with a Gmail app password |
 | Hosting | Vercel (web), Render (API), MongoDB Atlas (database) |
@@ -111,7 +111,7 @@ backend/
     controllers/               auth, demo/logout, chats, messages, shares
     middleware/                identifyUser, rate limiters
     services/
-      ai.services.js           Mistral client + source-capturing search tool
+      ai.services.js           Groq client (Mistral fallback) + source-capturing search tool
       internet.service.js      Tavily search adapter
       demo.service.js          shared demo account + idempotent seed
       quota.service.js         daily answered-question quota
@@ -140,7 +140,7 @@ npm install
 npm run dev                  # http://localhost:5173
 ```
 
-The demo desk needs only a working `MONGO_URI` and `JWT_SECRET`; the live answer flow also needs `MISTRAL_API_KEY` and `TAVILY_API_KEY`. Seeded demo threads do not call either provider.
+The demo desk needs only a working `MONGO_URI` and `JWT_SECRET`; the live answer flow also needs `GROQ_API_KEY` (or `MISTRAL_API_KEY`) and `TAVILY_API_KEY`. Seeded demo threads do not call either provider.
 
 ### Environment variables
 
@@ -153,7 +153,8 @@ The demo desk needs only a working `MONGO_URI` and `JWT_SECRET`; the live answer
 | `FRONTEND_URL` | Used in email links and as the default base for share links |
 | `BACKEND_URL` | Base URL for verification links |
 | `GOOGLE_USER` / `GOOGLE_PASSWORD` | Gmail sender and app password |
-| `MISTRAL_API_KEY` | Answer generation |
+| `GROQ_API_KEY` | Answer generation (primary) |
+| `MISTRAL_API_KEY` | Optional answer fallback when Groq is not configured |
 | `TAVILY_API_KEY` | Web search |
 | `SHARE_BASE_URL` | *Optional.* Overrides the public base URL used in share responses. Falls back to `FRONTEND_URL`. |
 

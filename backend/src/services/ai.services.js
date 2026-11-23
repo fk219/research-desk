@@ -1,11 +1,19 @@
 import * as z from 'zod'
 import { ChatMistralAI } from "@langchain/mistralai";
+import { ChatGroq } from "@langchain/groq";
 import { HumanMessage, AIMessage, SystemMessage, tool, createAgent } from 'langchain'
 import { searchInternet } from "./internet.service.js";
 
-const model = new ChatMistralAI({
-  model: "mistral-small-latest"
-});
+// Groq is the primary answer model because it keeps tool calling and streaming
+// on the free tier. Mistral stays available as a drop-in local alternative.
+const model = process.env.GROQ_API_KEY
+  ? new ChatGroq({
+      model: "openai/gpt-oss-120b",
+      apiKey: process.env.GROQ_API_KEY,
+    })
+  : new ChatMistralAI({
+      model: "mistral-small-latest",
+    });
 
 const MAX_SOURCES = 8;
 
