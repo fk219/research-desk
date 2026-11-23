@@ -5,6 +5,8 @@ A research answer engine: ask a question, the backend searches the live web with
 **Live app:** https://perplexity.furqankhan.dev
 **API:** https://perplexity-clone-7nda.onrender.com
 
+![Perplexity Clone](docs/preview.png)
+
 ![React](https://img.shields.io/badge/React-19-149ECA?logo=react&logoColor=white)
 ![Vite](https://img.shields.io/badge/Vite-7-646CFF?logo=vite&logoColor=white)
 ![Node](https://img.shields.io/badge/Node.js-22-5FA04E?logo=node.js&logoColor=white)
