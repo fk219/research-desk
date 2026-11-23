@@ -47,6 +47,15 @@ app.use(cors({
     methods: ["GET", "POST", "DELETE", "PUT", "PATCH"]
 }))
 
+app.use((req, res, next) => {
+    if (["GET", "HEAD", "OPTIONS"].includes(req.method)) return next()
+    const origin = req.headers.origin
+    if (origin && !allowedOrigins.includes(origin)) {
+        return res.status(403).json({ error: "Origin not allowed." })
+    }
+    return next()
+})
+
 app.use("/api/auth", authLimiter, authRouter)
 app.use("/api/chats", chatRouter)
 app.use("/api/public", publicRouter)

@@ -31,6 +31,8 @@ const chatSchema = new mongoose.Schema(
     },  {timestamps: true}
 )
 
+chatSchema.index({ user: 1, pinned: -1, updatedAt: -1 })
+
 const chatModel = mongoose.model("Chats", chatSchema)
 
 export {chatModel}
