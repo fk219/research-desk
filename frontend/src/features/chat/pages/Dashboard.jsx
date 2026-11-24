@@ -37,19 +37,19 @@ import { downloadThreadMarkdown } from "../utils/threadMarkdown";
 
 const SUGGESTIONS = [
   {
-    title: "How AI is changing research",
+    title: "The four-day week, in evidence",
     query:
-      "What are the most important breakthroughs in AI research right now, and what do they change for everyday work?",
+      "What do four-day week trials show about productivity, retention and burnout, and where are the studies weakest?",
   },
   {
-    title: "Write a debounce hook",
+    title: "OLED vs mini-LED for daily work",
     query:
-      "Write a performant debounce hook in React with TypeScript, and explain the edge cases.",
+      "Compare OLED and mini-LED laptop screens for writing, design and battery life, including burn-in and price.",
   },
   {
-    title: "Quantum computing, plainly",
+    title: "Where a viral statistic comes from",
     query:
-      "Explain quantum computing and superposition with simple, real-world analogies.",
+      "Find the original source for the 80 percent New Year's resolution claim, and explain what the data shows.",
   },
 ];
 
@@ -676,7 +676,8 @@ const Dashboard = () => {
                 </h1>
                 <p className="empty-note-copy">
                   There is nothing filed in this thread yet. Ask the desk a
-                  question to open the record.
+                  question to open the record. Sources are captured with the
+                  answer, and you can share or export the note once it is filed.
                 </p>
 
                 <Composer
@@ -711,10 +712,14 @@ const Dashboard = () => {
                   Ask a question <em>worth keeping.</em>
                 </h1>
 
+                <p className="hero-promise">
+                  Ask once. Keep the answer, the citations and the trail.
+                </p>
+
                 <p className="hero-lede">
                   Answers arrive as reading notes: clear prose, numbered
-                  passages, and a thread you can return to. Pick a line of
-                  inquiry below, or start your own.
+                  citation marks, and a source list you can check line by line.
+                  Pick a line of inquiry below, or start your own.
                 </p>
 
                 <div className="hero-composer">
@@ -731,6 +736,12 @@ const Dashboard = () => {
                     notice={quotaError}
                     onDismissNotice={() => dispatch(setQuotaError(null))}
                   />
+
+                  <p className="hero-after">
+                    After you ask, the numbered sources are captured with the
+                    answer, the thread is saved to your account, and you can
+                    share a read-only link or export the note as Markdown.
+                  </p>
                 </div>
 
                 <div className="hero-prompts">

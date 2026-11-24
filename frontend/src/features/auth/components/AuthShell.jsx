@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import Brand from "../../../components/Brand";
 import LegalLinks from "../../../components/LegalLinks";
 
-const AuthShell = ({ kicker, title, description, children, footer }) => (
+const AuthShell = ({ kicker, title, description, children, footer, aside }) => (
   <div className="auth-page">
     <main className="auth-frame">
       <div className="auth-brand-row">
@@ -26,6 +26,8 @@ const AuthShell = ({ kicker, title, description, children, footer }) => (
       </section>
 
       {footer && <p className="auth-foot">{footer}</p>}
+
+      {aside}
 
       <p className="auth-note">
         Your threads and reading history stay with your account.

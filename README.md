@@ -17,6 +17,33 @@ The desk is built around one promise: **give me an answer I can keep, cite, shar
 ![Render](https://img.shields.io/badge/API-Render-46E3B7)
 ![Vercel](https://img.shields.io/badge/Web-Vercel-000000?logo=vercel&logoColor=white)
 
+## The problem
+
+Search gives you an answer, then loses the trail. The source list is buried in a tab you closed, the wording changes on the next search, and the same question gets researched twice. An answer you cannot verify or reopen is hard to trust and expensive to repeat.
+
+## Who it is for
+
+Researchers, analysts, students, writers and developers who need to keep the sources next to the answer. Anyone who asks a question today and has to defend or reuse the answer later.
+
+## How it works
+
+1. Ask a question in the composer.
+2. The backend searches the live web with Tavily and reasons over the results with Groq.
+3. The answer is filed as a research note with numbered sources.
+4. The note is saved to your account, ready to reopen, organise, share or export.
+
+The request flow, provider choices and storage model are documented in [How an answer is produced](#how-an-answer-is-produced).
+
+## How it could make money
+
+The current build is a portfolio project and has no billing. If it became a product, the natural paid paths are:
+
+- **Higher limits.** More questions per day and longer threads than the free tier.
+- **Private sources.** Add internal documents or a private search index alongside the public web.
+- **Collections.** Group related notes into a citable collection with a stable reading order.
+- **Team libraries.** Shared workspaces where a team can search, annotate and reuse its research.
+- **Shared reports.** Polished public or client-facing reports with branding, access control and expiry.
+
 ## What it does
 
 Most chat demos answer from the model's memory and throw the conversation away. This one answers from today's web, keeps the question next to the answer, and stores the source cards that the search tool returned. That makes the thread an audit trail rather than a disposable reply.

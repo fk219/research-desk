@@ -121,6 +121,18 @@ export default function LoginPage() {
           <Link to="/register">Create an account</Link>
         </>
       }
+      aside={
+        <aside className="auth-why" aria-labelledby="auth-why-title">
+          <h2 className="auth-why-kicker" id="auth-why-title">
+            Why this exists
+          </h2>
+          <p className="auth-why-copy">
+            Search gives you answers you cannot trust or find again. Research
+            Desk keeps the answer, the numbered sources, and the trail in one
+            note you can reopen, organise and share.
+          </p>
+        </aside>
+      }
     >
       <div className="demo-open-wrap">
         <button
