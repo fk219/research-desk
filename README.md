@@ -8,6 +8,8 @@ The desk is built around one promise: **give me an answer I can keep, cite, shar
 **API:** https://perplexity-clone-7nda.onrender.com
 
 ![Research Desk research note](docs/preview.png)
+![Research Desk sourced answer](docs/answer.png)
+![Research Desk source cards](docs/sources.png)
 
 ![React](https://img.shields.io/badge/React-19-149ECA?logo=react&logoColor=white)
 ![Vite](https://img.shields.io/badge/Vite-7-646CFF?logo=vite&logoColor=white)
