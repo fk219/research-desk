@@ -4,6 +4,6 @@
       "source": "/api/:path*",
       "destination": "https://perplexity-clone-7nda.onrender.com/api/:path*"
     },
-    { "source": "/(.*)", "destination": "/index.html" }
+    { "source": "/((?!_vercel/).*)", "destination": "/index.html" }
   ]
 }
