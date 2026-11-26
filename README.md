@@ -33,7 +33,7 @@ The result is a reading note, not a disposable reply.
 - **Sourced answers.** Each answer stores the sources returned by the search tool, and inline citation markers jump to the matching source card.
 - **Streaming responses.** The composer sends `stream: true` and renders server-sent `start`, `chunk`, and `done` events. The non-streaming JSON path also remains in the API.
 - **Saved threads.** Server-side history per account, grouped by date in the rail, with inline rename and pin-to-top.
-- **Read-only sharing.** A thread can be published at `/share/:shareId`. The public payload contains the title, timestamps, message role, content, sources, and date. It contains no email, user id, chat id, or message id. Turning sharing off keeps the same id, so turning it back on restores the link.
+- **Read-only sharing.** A thread can be published at `/share/:shareId`. The public payload contains the title, timestamps, message role, content, sources, and date. It contains no email, user id, chat id, or message id. Sharing is off by default. Turning sharing off keeps the same id, so turning it back on restores the link.
 - **Markdown export.** Download the question, answers, and numbered sources with URLs as a portable `.md` file.
 - **Real session revocation.** Logout increments the user's `tokenVersion`, invalidating every JWT issued earlier, then clears the cookie. A password change does the same.
 - **Account controls.** Change the password (8 to 72 characters), download a JSON export of the account and all threads, or delete the account with its threads, messages, and share links.
@@ -235,7 +235,7 @@ npm run build
 ## Deployment
 
 - **Web:** `frontend/vercel.json` proxies `/api/:path*` to `https://research-desk-api.onrender.com/api/:path*` and rewrites every other path to `index.html`, so `/share/:shareId` resolves in the SPA.
-- **API:** the live service runs on Render's free plan. The first request after idle can take about 50 seconds.
+- **API:** the live service runs on Render's free plan at https://research-desk-api.onrender.com. The first request after idle can take about 50 seconds.
 - **Database:** MongoDB Atlas.
 - **CI:** `.github/workflows/ci.yml` runs the API tests on Node 22 with a syntax check, then runs frontend lint and build.
 - **Production URLs:** set `FRONTEND_URL` (or `SHARE_BASE_URL`) to the public web origin so share responses return usable links. The frontend also copies the current origin's `/share/:shareId` URL regardless.
@@ -248,7 +248,7 @@ npm run build
 - If `TAVILY_API_KEY` is missing or a search fails, the tool returns an error payload and the answer can still be produced without source cards. The UI handles answers with no sources.
 - Search returns up to five results per call; stored source cards are de-duplicated by URL and capped at eight.
 - The demo threads are static examples, not live answers. Everything added by visitors is shared with later visitors.
-- The project has no billing and is a portfolio build, not a hosted product with paid tiers.
+- The project has no billing; it is a portfolio build, not a commercial product.
 - The API trusts one proxy hop so Render's forwarded client IPs work with the per-IP limiters.
 
 ## License
