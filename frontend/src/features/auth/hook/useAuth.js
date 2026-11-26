@@ -3,7 +3,7 @@ import { useDispatch } from "react-redux";
 import { register, login, demoLogin, logout, getMe } from "../service/auth.api";
 import { setUser, setLoading, setError } from "../auth.slice";
 
-const SESSION_ENDED_KEY = "perplexity:session-ended:v1";
+const SESSION_ENDED_KEY = "research-desk:session-ended:v1";
 
 const hasEndedSession = () => {
   try {

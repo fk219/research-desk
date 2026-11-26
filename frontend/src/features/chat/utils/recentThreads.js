@@ -1,4 +1,4 @@
-const STORAGE_KEY = "perplexity:recent-threads:v1";
+const STORAGE_KEY = "research-desk:recent-threads:v1";
 const MAX_THREADS = 24;
 
 const cleanText = (value) => (typeof value === "string" ? value.trim() : "");
