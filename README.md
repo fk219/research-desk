@@ -5,7 +5,7 @@ Sourced answers you can keep. A research workspace for questions you intend to k
 The desk is built around one promise: **give me an answer I can keep, cite, share and verify.**
 
 **Live app:** https://researchdesk.furqankhan.dev
-**API:** https://perplexity-clone-7nda.onrender.com
+**API:** https://research-desk-api.onrender.com
 
 ![ResearchDesk research note](docs/preview.png)
 ![ResearchDesk sourced answer](docs/answer.png)

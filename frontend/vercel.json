@@ -2,7 +2,7 @@
   "rewrites": [
     {
       "source": "/api/:path*",
-      "destination": "https://perplexity-clone-7nda.onrender.com/api/:path*"
+      "destination": "https://research-desk-api.onrender.com/api/:path*"
     },
     { "source": "/((?!_vercel/).*)", "destination": "/index.html" }
   ]

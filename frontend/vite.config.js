@@ -9,7 +9,7 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'https://perplexity-clone-7nda.onrender.com',
+        target: 'https://research-desk-api.onrender.com',
         changeOrigin: true,
       },
     },
