@@ -10,7 +10,7 @@
     try {
       const stored = localStorage.getItem(KEY);
       if (stored === "light" || stored === "dark") return stored;
-    } catch {}
+    } catch { /* ignore storage errors */ }
     return root.dataset.theme === "light" ? "light" : "dark";
   };
 
@@ -26,7 +26,7 @@
     root.style.colorScheme = theme;
     try {
       localStorage.setItem(KEY, theme);
-    } catch {}
+    } catch { /* ignore storage errors */ }
     if (button) {
       button.innerHTML = icon(theme === "dark" ? "sun" : "moon");
       button.setAttribute("aria-label", label(theme));
