@@ -1,18 +1,29 @@
 import nodemailer from "nodemailer"
 
-const transporter = nodemailer.createTransport({
-    service: "gmail",
-    auth: {
-        user: process.env.GOOGLE_USER,
-        pass: process.env.GOOGLE_PASSWORD
-    }
-})
+const hasMailConfig = Boolean(process.env.GOOGLE_USER && process.env.GOOGLE_PASSWORD)
 
-transporter.verify()
-.then(() => {console.log("Email transporter is ready to send emails")})
-.catch((error) => {console.error("Error occurred while verifying email transporter:", error)})
+const transporter = hasMailConfig
+    ? nodemailer.createTransport({
+        service: "gmail",
+        auth: {
+            user: process.env.GOOGLE_USER,
+            pass: process.env.GOOGLE_PASSWORD
+        }
+    })
+    : null
+
+if (transporter) {
+    transporter.verify()
+    .then(() => {console.log("Email transporter is ready to send emails")})
+    .catch((error) => {console.error("Error occurred while verifying email transporter:", error)})
+}
 
 const sendEmail = async (to, subject, html, text) => {
+    if (!transporter) {
+        console.warn("Email is not configured. Skipping message:", subject)
+        return
+    }
+
     const mailOptions = {
         from: process.env.GOOGLE_USER,
         to,

@@ -1,15 +1,15 @@
-# Research Desk
+# ResearchDesk
 
 Sourced answers you can keep. A research workspace for questions you intend to keep. Ask a question, the backend searches the live web with Tavily and reasons over the results with Groq (Mistral is a drop-in fallback), and the answer is filed as a reading note: sourced prose, a numbered source list, and a thread you can reopen, organise, export or share.
 
 The desk is built around one promise: **give me an answer I can keep, cite, share and verify.**
 
-**Live app:** https://perplexity.furqankhan.dev
+**Live app:** https://researchdesk.furqankhan.dev
 **API:** https://perplexity-clone-7nda.onrender.com
 
-![Research Desk research note](docs/preview.png)
-![Research Desk sourced answer](docs/answer.png)
-![Research Desk source cards](docs/sources.png)
+![ResearchDesk research note](docs/preview.png)
+![ResearchDesk sourced answer](docs/answer.png)
+![ResearchDesk source cards](docs/sources.png)
 
 ![React](https://img.shields.io/badge/React-19-149ECA?logo=react&logoColor=white)
 ![Vite](https://img.shields.io/badge/Vite-7-646CFF?logo=vite&logoColor=white)
@@ -179,6 +179,7 @@ The demo desk needs only a working `MONGO_URI` and `JWT_SECRET`; the live answer
 |---|---|
 | `PORT` | API port |
 | `NODE_ENV` | Enables `Secure`/`SameSite=None` cookies in production |
+| `CORS_ORIGINS` | Comma-separated allowed browser origins |
 | `MONGO_URI` | MongoDB connection string |
 | `JWT_SECRET` | Signs session and email-verification tokens |
 | `FRONTEND_URL` | Used in email links and as the default base for share links |
@@ -193,6 +194,7 @@ The demo desk needs only a working `MONGO_URI` and `JWT_SECRET`; the live answer
 
 | Method | Route | Auth | Purpose |
 |---|---|---|---|
+| `GET` | `/health` | Public | API and database readiness |
 | `POST` | `/api/auth/register` | Public | Create account, send verification email |
 | `GET` | `/api/auth/verify-email?token=` | Public | Verify email |
 | `POST` | `/api/auth/login` | Public | Sign in, set session cookie |
@@ -210,6 +212,15 @@ The demo desk needs only a working `MONGO_URI` and `JWT_SECRET`; the live answer
 | `DELETE` | `/api/chats/delete/:chatId` | Cookie | Delete a thread and its messages |
 | `GET` | `/api/public/chats/:shareId` | Public | Read-only shared report |
 
+## Tests
+
+```bash
+cd backend
+npm test                     # 7 tests: health, validation, auth, demo session, quotas, guards
+```
+
+The API suite runs against an in-memory MongoDB. It covers health, registration validation, duplicate accounts, unverified-login rejection, the one-click demo session, quota reads, chat listing, logout revocation, guest rejection, and unknown public share links. It does not call Groq, Mistral, or Tavily.
+
 ## Deployment notes
 
 - The API runs on Render's free plan, so the first request after idle can take ~50 seconds.
@@ -217,3 +228,7 @@ The demo desk needs only a working `MONGO_URI` and `JWT_SECRET`; the live answer
 - Verification emails need a Gmail app password, not the account password.
 - `frontend/vercel.json` rewrites client routes to `index.html`, so `/share/:shareId` resolves to the SPA.
 - Set `FRONTEND_URL` (or `SHARE_BASE_URL`) to the public web origin so share responses return usable URLs. The frontend copies the current origin's `/share/:shareId` link regardless.
+
+## License
+
+MIT. See [LICENSE](LICENSE).

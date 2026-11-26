@@ -27,7 +27,7 @@ export const buildThreadMarkdown = ({ title, messages = [] }) => {
   const lines = [
     `# ${headline}`,
     "",
-    `_Exported from the Research Desk · ${formatDate(new Date())}_`,
+    `_Exported from the ResearchDesk · ${formatDate(new Date())}_`,
     "",
   ];
 

@@ -5,12 +5,12 @@ export default function Terms() {
     <LegalShell
       kicker="Terms of use"
       title="Terms"
-      summary="The short rules for using Research Desk. The service is a beta, answers can be wrong, and you stay responsible for how you use them."
+      summary="The short rules for using ResearchDesk. The service is a beta, answers can be wrong, and you stay responsible for how you use them."
     >
       <section className="legal-section" aria-labelledby="terms-beta">
         <h2 id="terms-beta">A beta service</h2>
         <p>
-          Research Desk is a free, independent beta project. Features may change,
+          ResearchDesk is a free, independent beta project. Features may change,
           break, or be removed without notice. The service may be paused or
           stopped entirely. Keep your own copy of anything you need to keep.
         </p>
@@ -64,7 +64,7 @@ export default function Terms() {
           off at any time.
         </p>
         <p>
-          The Research Desk name and interface are part of this project. The
+          The ResearchDesk name and interface are part of this project. The
           source code is released under the MIT license in the repository. Web
           sources and snippets belong to their publishers and remain subject to
           their terms. Do not copy or republish material you do not have the

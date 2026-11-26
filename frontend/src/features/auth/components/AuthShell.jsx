@@ -9,7 +9,7 @@ const AuthShell = ({ kicker, title, description, children, footer, aside }) => (
         <Link
           to="/"
           className="auth-brand-link"
-          aria-label="Research Desk"
+          aria-label="ResearchDesk"
         >
           <Brand compact />
         </Link>

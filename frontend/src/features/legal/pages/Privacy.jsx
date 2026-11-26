@@ -5,12 +5,12 @@ export default function Privacy() {
     <LegalShell
       kicker="Privacy notice"
       title="Privacy"
-      summary="What Research Desk stores, why it stores it, and how to have it removed. This is a small beta project, not a certified or audited service."
+      summary="What ResearchDesk stores, why it stores it, and how to have it removed. This is a small beta project, not a certified or audited service."
     >
       <section className="legal-section" aria-labelledby="privacy-who">
         <h2 id="privacy-who">Who runs the desk</h2>
         <p>
-          Research Desk is an independent beta project. Questions about this
+          ResearchDesk is an independent beta project. Questions about this
           notice or your data can go to{" "}
           <a href="mailto:furqank219@gmail.com">furqank219@gmail.com</a>.
         </p>

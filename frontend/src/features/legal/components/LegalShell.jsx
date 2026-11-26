@@ -7,7 +7,7 @@ import LegalLinks from "../../../components/LegalLinks";
 const LegalShell = ({ kicker, title, summary, children }) => {
   useEffect(() => {
     const previousTitle = document.title;
-    document.title = `${title} · Research Desk`;
+    document.title = `${title} · ResearchDesk`;
 
     return () => {
       document.title = previousTitle;
@@ -18,7 +18,7 @@ const LegalShell = ({ kicker, title, summary, children }) => {
     <div className="share-page legal-page">
       <header className="topbar public-topbar">
         <div className="topbar-left">
-          <Link to="/" className="brand-button" aria-label="Research Desk home">
+          <Link to="/" className="brand-button" aria-label="ResearchDesk home">
             <Brand />
           </Link>
           <span className="topbar-date">Legal</span>
@@ -58,12 +58,12 @@ const LegalShell = ({ kicker, title, summary, children }) => {
                 </span>
                 <span>End of notice</span>
                 <span className="memo-end-rule" aria-hidden="true" />
-                <span>Research Desk</span>
+                <span>ResearchDesk</span>
               </footer>
             </article>
 
             <footer className="site-foot">
-              <span className="site-foot-brand">Research Desk</span>
+              <span className="site-foot-brand">ResearchDesk</span>
               <LegalLinks />
               <span className="site-foot-note">
                 A small, independent beta desk.

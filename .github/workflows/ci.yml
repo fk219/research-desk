@@ -19,6 +19,17 @@ jobs:
           cache: npm
           cache-dependency-path: backend/package-lock.json
       - run: npm ci
+      - name: Run API tests
+        run: npm test
+        env:
+          NODE_ENV: test
+          JWT_SECRET: ci-test-secret-32-characters-minimum
+          GROQ_API_KEY: ci-test-groq-key
+          TAVILY_API_KEY: ci-test-tavily-key
+          MISTRAL_API_KEY: ci-test-mistral-key
+          FRONTEND_URL: http://localhost:5173
+          BACKEND_URL: http://localhost:3000
+          MONGOMS_STARTUP_TIMEOUT: "120000"
       - name: Syntax check
         run: find src -name "*.js" -print0 | xargs -0 -n1 node --check
 

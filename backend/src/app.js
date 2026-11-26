@@ -4,6 +4,7 @@ import morgan from "morgan"
 import cors from "cors"
 import helmet from "helmet"
 import compression from "compression"
+import mongoose from "mongoose"
 
 import authRouter from "./routes/auth.routes.js"
 import chatRouter from "./routes/chat.routes.js"
@@ -35,7 +36,7 @@ app.use(compression())
 
 const allowedOrigins = (
     process.env.CORS_ORIGINS ||
-    "https://perplexity.furqankhan.dev,http://localhost:5173"
+    "https://researchdesk.furqankhan.dev,http://localhost:5173"
 )
     .split(",")
     .map((origin) => origin.trim())
@@ -62,7 +63,16 @@ app.use("/api/public", publicRouter)
 
 app.get("/", (req, res) => {
     res.send("Hello World")
-})  
+})
+
+app.get("/health", (req, res) => {
+    res.status(200).json({
+        ok: true,
+        service: "research-desk-api",
+        database: mongoose.connection.readyState === 1 ? "connected" : "disconnected",
+        uptimeSeconds: Math.round(process.uptime())
+    })
+})
 
 app.use((req, res) => {
     res.status(404).json({ error: "Route not found." })

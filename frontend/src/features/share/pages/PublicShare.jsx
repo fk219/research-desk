@@ -13,7 +13,7 @@ const PublicTopbar = () => (
       <Link
         to="/login"
         className="brand-button"
-        aria-label="Research Desk"
+        aria-label="ResearchDesk"
       >
         <Brand />
       </Link>
@@ -35,7 +35,7 @@ const PublicTopbar = () => (
 
 const PublicFooter = () => (
   <footer className="site-foot public-foot">
-    <span className="site-foot-brand">Research Desk</span>
+    <span className="site-foot-brand">ResearchDesk</span>
     <LegalLinks />
     <span className="site-foot-note">Sourced answers you can keep.</span>
   </footer>
@@ -101,7 +101,7 @@ const PublicShare = () => {
     if (!thread?.title) return undefined;
 
     const previousTitle = document.title;
-    document.title = `${thread.title} · Research Desk`;
+    document.title = `${thread.title} · ResearchDesk`;
 
     return () => {
       document.title = previousTitle;

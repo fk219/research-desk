@@ -3903,3 +3903,31 @@ a.source-card:hover {
   }
 }
 
+
+/* ---------------------------------------------------------------- */
+/* Theme switch: after-hours reading desk                           */
+/* ---------------------------------------------------------------- */
+html[data-theme="dark"] {
+  --paper: #101413;
+  --paper-deep: #0b0f0e;
+  --card: #171c1a;
+  --card-deep: #121715;
+  --ink: #e8eee9;
+  --ink-soft: #d0d8d2;
+  --muted: #9caaa2;
+  --faint: #89978f;
+  --hairline: #2a3530;
+  --hairline-strong: #3b4a43;
+  --oxblood: #c98a78;
+  --oxblood-deep: #d7a08f;
+  --teal: #7cc4b8;
+  --teal-wash: #15231f;
+  --danger-wash: #2a1815;
+  --danger-line: #573029;
+  --theme-toggle-bottom: 88px;
+  color-scheme: dark;
+}
+
+html[data-theme="dark"] ::selection {
+  background: rgba(124, 196, 184, 0.24);
+}

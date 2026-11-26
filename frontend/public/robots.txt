@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://perplexity.furqankhan.dev/sitemap.xml
+Sitemap: https://researchdesk.furqankhan.dev/sitemap.xml

@@ -7,7 +7,7 @@ import LegalLinks from "../../../components/LegalLinks";
 const SettingsShell = ({ children }) => {
   useEffect(() => {
     const previousTitle = document.title;
-    document.title = "Account settings · Research Desk";
+    document.title = "Account settings · ResearchDesk";
 
     return () => {
       document.title = previousTitle;
@@ -22,7 +22,7 @@ const SettingsShell = ({ children }) => {
 
       <header className="topbar">
         <div className="topbar-left">
-          <Link to="/" className="brand-button" aria-label="Research Desk home">
+          <Link to="/" className="brand-button" aria-label="ResearchDesk home">
             <Brand />
           </Link>
           <span className="topbar-date">Account</span>
@@ -46,7 +46,7 @@ const SettingsShell = ({ children }) => {
             {children}
 
             <footer className="site-foot settings-foot">
-              <span className="site-foot-brand">Research Desk</span>
+              <span className="site-foot-brand">ResearchDesk</span>
               <LegalLinks />
               <span className="site-foot-note">Account file</span>
             </footer>

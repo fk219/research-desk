@@ -1,4 +1,4 @@
-# Research Desk: web client
+# ResearchDesk: web client
 
 React 19 + Vite + Redux app for the research desk. The root [README](../README.md) covers the product, backend, environment variables and deployment.
 

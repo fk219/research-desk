@@ -181,7 +181,7 @@ const Settings = () => {
           </span>
           <span>End of account file</span>
           <span className="memo-end-rule" aria-hidden="true" />
-          <span>Research Desk</span>
+          <span>ResearchDesk</span>
         </footer>
       </article>
     </SettingsShell>
