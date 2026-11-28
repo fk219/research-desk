@@ -7,6 +7,7 @@ const Dashboard = React.lazy(() => import('../features/chat/pages/Dashboard'))
 const Login = React.lazy(() => import('../features/auth/pages/Login'))
 const Register = React.lazy(() => import('../features/auth/pages/Register'))
 const Settings = React.lazy(() => import('../features/account/pages/Settings'))
+const Library = React.lazy(() => import('../features/library/pages/Library'))
 const PublicShare = React.lazy(() => import('../features/share/pages/PublicShare'))
 const Privacy = React.lazy(() => import('../features/legal/pages/Privacy'))
 const Terms = React.lazy(() => import('../features/legal/pages/Terms'))
@@ -25,6 +26,10 @@ const routes = createBrowserRouter([
     {
         path: '/settings',
         element: <Protected>{load(<Settings />, 'Opening account settings')}</Protected>
+    },
+    {
+        path: '/library',
+        element: <Protected>{load(<Library />, 'Opening the source library')}</Protected>
     },
     {
         path: '/register',

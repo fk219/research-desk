@@ -5,6 +5,7 @@ import {
   AlertCircle,
   Check,
   Download,
+  BookOpen,
   Link2,
   LogOut,
   Menu,
@@ -466,6 +467,15 @@ const Dashboard = () => {
           </div>
 
           <LegalLinks className="account-legal" />
+
+          <Link
+            to="/library"
+            className="account-settings"
+            aria-label="Private source library"
+          >
+            <BookOpen size={14} aria-hidden="true" />
+            <span className="account-settings-label">Library</span>
+          </Link>
 
           <Link
             to="/settings"
