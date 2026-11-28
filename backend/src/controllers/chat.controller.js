@@ -98,7 +98,7 @@ const sendMessages = async (req, res) => {
                 sendEvent({ type: 'chunk', chatId: currentChatId, chunk })
             }, (sources) => {
                 answerSources = sources
-            })
+            }, { userId: req.user.id })
 
             const aiMessage = await messageModel.create({
                 chat: currentChatId,
@@ -120,7 +120,7 @@ const sendMessages = async (req, res) => {
         
         const result = await generateResponse(chatMessages, undefined, (sources) => {
             answerSources = sources
-        })
+        }, { userId: req.user.id })
 
         const aiMessage = await messageModel.create({
             chat: currentChatId,

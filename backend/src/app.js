@@ -8,6 +8,7 @@ import mongoose from "mongoose"
 
 import authRouter from "./routes/auth.routes.js"
 import chatRouter from "./routes/chat.routes.js"
+import libraryRouter from "./routes/library.routes.js"
 import publicRouter from "./routes/public.routes.js"
 import { authLimiter } from "./middleware/rateLimit.middleware.js"
 import { requestId } from "./middleware/requestId.js"
@@ -61,6 +62,7 @@ app.use((req, res, next) => {
 
 app.use("/api/auth", authLimiter, authRouter)
 app.use("/api/chats", chatRouter)
+app.use("/api/library", libraryRouter)
 app.use("/api/public", publicRouter)
 
 app.get("/", (req, res) => {

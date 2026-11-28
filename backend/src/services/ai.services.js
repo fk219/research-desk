@@ -3,6 +3,7 @@ import { ChatMistralAI } from "@langchain/mistralai";
 import { ChatGroq } from "@langchain/groq";
 import { HumanMessage, AIMessage, SystemMessage, tool, createAgent } from 'langchain'
 import { searchInternet } from "./internet.service.js";
+import { searchLibrary } from "./library.service.js";
 
 // Groq is the primary answer model because it keeps tool calling and streaming
 // on the free tier. Mistral stays available as a drop-in local alternative.
@@ -43,6 +44,42 @@ const makeSearchTool = (onSources) => tool(
     }
 );
 
+const makeLibraryTool = (userId, onSources) => tool(
+    async ({ query }) => {
+      const results = await searchLibrary(userId, query, 5);
+      const backend = (process.env.BACKEND_URL || "http://localhost:3000").replace(/\/+$/, "");
+
+      const sources = results
+        .filter((result) => result.shareId)
+        .map((result) => ({
+          title: `Library: ${result.documentTitle}`,
+          url: `${backend}/api/public/library/${result.shareId}`,
+          snippet: result.text.slice(0, 280)
+        }));
+
+      if (sources.length && typeof onSources === "function") {
+        onSources(sources);
+      }
+
+      return JSON.stringify({
+        source: "private_library",
+        results: results.map((result) => ({
+          title: result.documentTitle,
+          chunk: result.chunkIndex,
+          score: result.score,
+          text: result.text
+        }))
+      });
+    },
+    {
+      name: "search_library",
+      description: "Searches the signed-in user's uploaded private documents. Use this before the web when the question may be answered by a document in their library. Returned excerpts keep their document title and chunk number.",
+      schema: z.object({
+        query: z.string().describe("The terms to search for in the private document library.")
+      })
+    }
+);
+
 const extractChunkText = (chunk) => {
   const content = chunk?.content;
 
@@ -73,7 +110,7 @@ const cleanSource = (source) => {
   };
 };
 
-const generateResponse = async (messages, onChunk, onSources) => {
+const generateResponse = async (messages, onChunk, onSources, context = {}) => {
   const collected = new Map();
 
   const collectSources = (incoming) => {
@@ -88,9 +125,14 @@ const generateResponse = async (messages, onChunk, onSources) => {
     }
   };
 
+  const tools = [makeSearchTool(collectSources)];
+  if (context.userId) {
+    tools.push(makeLibraryTool(context.userId, collectSources));
+  }
+
   const agent = createAgent({
     model: model,
-    tools: [makeSearchTool(collectSources)]
+    tools
   });
 
   const formattedMessages = messages

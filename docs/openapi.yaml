@@ -106,6 +106,99 @@ paths:
       responses:
         "200": { description: Messages }
         "404": { description: Not found for this user }
+  /api/library/documents:
+    get:
+      tags: [Chats]
+      summary: List the signed-in user's documents
+      responses:
+        "200": { description: Documents }
+        "401": { description: Unauthenticated }
+    post:
+      tags: [Chats]
+      summary: Upload a private text or Markdown document
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [title, content]
+              properties:
+                title: { type: string, maxLength: 160 }
+                content: { type: string, minLength: 20, maxLength: 200000 }
+                kind: { type: string, enum: [text, markdown] }
+      responses:
+        "202": { description: Queued with document and job ids }
+        "400": { description: Validation error }
+        "413": { description: Document too large }
+  /api/library/documents/{documentId}:
+    get:
+      tags: [Chats]
+      summary: Read a document
+      parameters:
+        - name: documentId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200": { description: Document with content }
+        "404": { description: Not found for this user }
+    delete:
+      tags: [Chats]
+      summary: Delete a document and its chunks
+      parameters:
+        - name: documentId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200": { description: Deleted }
+  /api/library/documents/{documentId}/reingest:
+    post:
+      tags: [Chats]
+      summary: Re-run chunking and indexing
+      parameters:
+        - name: documentId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "202": { description: Queued }
+  /api/library/jobs/{jobId}:
+    get:
+      tags: [Chats]
+      summary: Read ingestion job status
+      parameters:
+        - name: jobId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200": { description: Job }
+  /api/library/search:
+    get:
+      tags: [Chats]
+      summary: Hybrid search over the user's library
+      parameters:
+        - name: q
+          in: query
+          required: true
+          schema: { type: string }
+      responses:
+        "200": { description: Ranked chunks with document id and score }
+        "400": { description: Missing query }
+  /api/public/library/{shareId}:
+    get:
+      tags: [Public]
+      summary: Read a cited library document
+      parameters:
+        - name: shareId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200": { description: Public document content }
+        "404": { description: Not found }
   /api/public/chats/{shareId}:
     get:
       tags: [Public]

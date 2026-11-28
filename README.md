@@ -38,7 +38,9 @@ The result is a reading note, not a disposable reply.
 - **Real session revocation.** Logout increments the user's `tokenVersion`, invalidating every JWT issued earlier, then clears the cookie. A password change does the same.
 - **Account controls.** Change the password (8 to 72 characters), download a JSON export of the account and all threads, or delete the account with its threads, messages, and share links.
 - **Demo desk.** One click opens a shared account with three clearly labelled static example threads. No email verification is needed.
+- **Private document library.** Upload text or Markdown, index it in the background, search it with hybrid local embeddings + keyword ranking, and let the assistant cite it alongside live web sources. Re-ingest and delete are supported; uploads are scoped to the owner.
 - **Abuse limits.** 25 answered questions per user per UTC day, plus per-IP limits on auth, account changes, demo entry, and message sends.
+- **Library limits.** Documents are text/Markdown JSON up to 200,000 characters. Embeddings are local hash-256 vectors, and ingestion runs in-process rather than a durable external queue.
 
 ## Screens
 
@@ -227,7 +229,7 @@ cd backend
 npm test
 ```
 
-`npm test` runs `node --test`. The suite creates an in-memory MongoDB and covers eight cases: health, readiness, registration validation, duplicate accounts, unverified-login rejection, the demo session, guest rejection on protected routes, and unknown share links. It does not call Groq, Mistral, or Tavily.
+`npm test` runs `node --test`. The suite creates an in-memory MongoDB and covers eleven cases: health, readiness, registration validation, duplicate accounts, unverified-login rejection, the demo session, guest rejection, unknown share links, library auth, and the full upload → ingest → search → public-source → delete path. It does not call Groq, Mistral, or Tavily.
 
 The frontend has no unit-test script. CI runs:
 

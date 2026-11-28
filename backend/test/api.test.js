@@ -45,6 +45,14 @@ test('readiness endpoint verifies the database', async () => {
   assert.equal(typeof res.body.latencyMs, 'number');
 });
 
+test('library routes require a signed-in user', async () => {
+  const docs = await request(app).get('/api/library/documents');
+  const search = await request(app).get('/api/library/search?q=policy');
+
+  assert.equal(docs.status, 401);
+  assert.equal(search.status, 401);
+});
+
 test('registration validates its inputs', async () => {
   const res = await request(app)
     .post('/api/auth/register')

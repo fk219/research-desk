@@ -25,9 +25,13 @@ A chat owns messages. An AI message stores the source cards collected during the
 
 The model decides the search query, but the backend performs the Tavily call, normalizes sources, deduplicates by URL, and stores the source trail. The model cannot invent a source URL into the stored list.
 
-### Search is live, not a stale index
+### Search has two paths: live web and private library
 
-ResearchDesk is optimized for current answers. Tavily is the retrieval layer; sources are stored with the answer so the user can reopen the trail. A future document library will add a private retrieval path with the same source contract.
+Tavily remains the live-web retrieval layer. The private library path stores uploaded text, splits it into overlapping chunks, computes local 256-dimension hash embeddings, and ranks chunks with a hybrid semantic + keyword score. The assistant gets a `search_library` tool in addition to `search_internet`; both contribute to the same stored source trail.
+
+### Ingestion is asynchronous
+
+Uploading a document returns `202` with a document and job id. An in-process worker marks the job `processing`, builds chunks, and marks it `ready` or `failed`. Jobs interrupted by a restart are resumed on boot. The durable-queue migration is the next scale step.
 
 ### Quotas are per user per day
 
@@ -40,6 +44,9 @@ Message creation checks the daily quota before creating a chat or calling a mode
 | `users` | Account and auth state | email unique |
 | `chats` | Thread metadata, pinning, sharing | user + pinned + updatedAt, shareId unique sparse |
 | `messages` | User questions and AI answers with sources | chat + createdAt |
+| `librarydocuments` | Private uploaded documents and share ids | user + created, user + status, shareId unique sparse |
+| `librarychunks` | Chunk text, terms, embedding | document + index unique, user + document |
+| `ingestionjobs` | Upload processing state and retries | document + created, status + created |
 
 ## Failure behavior
 
@@ -51,7 +58,8 @@ Message creation checks the daily quota before creating a chat or calling a mode
 
 ## Limits
 
-- No document upload/library yet.
-- No background ingestion worker.
+- Library embeddings are local hash-256 vectors, not transformer embeddings.
+- The ingestion worker is in-process, not a durable queue.
+- Document ingestion accepts text and Markdown JSON, not PDF/binary uploads yet.
 - No citation-quality evaluation set yet.
 - Render free-tier cold starts affect first response latency.

@@ -51,9 +51,20 @@ Then open the demo desk, ask one question, and confirm sources persist after ref
 
 Promote the previous Vercel deployment and roll back the Render service. Chat data is additive; no destructive migration is required.
 
+## Library ingestion
+
+1. `POST /api/library/documents` with `{ "title": "...", "content": "...", "kind": "text" }`.
+2. Poll `GET /api/library/jobs/:jobId` until `ready` or `failed`.
+3. Search `GET /api/library/search?q=...`.
+4. The assistant can use `search_library` automatically when the user has ready documents.
+
+Jobs are in-process. On restart, queued/processing jobs are resumed by the server.
+
 ## Known limits
 
-- No document library/ingestion yet.
+- Library embeddings are local hash-256 vectors, not transformer embeddings.
+- The worker is in-process; there is no durable external queue.
+- Text/Markdown only; no PDF or binary parsing yet.
 - No citation evaluation benchmark yet.
 - Free-tier cold start can take 30–60 seconds.
 - Provider quotas and Tavily usage are external limits.
