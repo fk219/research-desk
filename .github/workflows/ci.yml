@@ -33,6 +33,13 @@ jobs:
       - name: Syntax check
         run: find src -name "*.js" -print0 | xargs -0 -n1 node --check
 
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build production API image
+        run: docker build -f backend/Dockerfile -t research-desk-api:ci backend
+
   web:
     runs-on: ubuntu-latest
     defaults:

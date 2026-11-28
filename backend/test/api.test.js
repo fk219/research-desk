@@ -33,6 +33,16 @@ test('health endpoint reports a live API and database', async () => {
   assert.equal(res.status, 200);
   assert.equal(res.body.ok, true);
   assert.equal(res.body.database, 'connected');
+  assert.ok(res.headers['x-request-id']);
+});
+
+test('readiness endpoint verifies the database', async () => {
+  const res = await request(app).get('/health/ready');
+
+  assert.equal(res.status, 200);
+  assert.equal(res.body.ok, true);
+  assert.equal(res.body.database, 'up');
+  assert.equal(typeof res.body.latencyMs, 'number');
 });
 
 test('registration validates its inputs', async () => {

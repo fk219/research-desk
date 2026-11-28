@@ -62,6 +62,8 @@ The result is a reading note, not a disposable reply.
 
 ## Architecture
 
+System diagram, failure behavior, runbook, and decisions are in [docs/architecture.md](docs/architecture.md), [docs/runbook.md](docs/runbook.md), and [docs/adr](docs/adr). The API contract is [docs/openapi.yaml](docs/openapi.yaml).
+
 The browser is a React SPA. Vercel rewrites `/api/*` to the Render API, so the session cookie stays on one origin in production. The API mounts three routers: `/api/auth`, `/api/chats`, and `/api/public`.
 
 A question passes the per-IP message limiter and the daily quota check. If it starts a new thread, the API generates a short title and creates the `Chat`; then it writes the user message before calling the model. The LangChain agent can call `search_internet`. Tavily's results go back to the model, while the server separately collects clean, de-duplicated source cards (up to eight). The stream sends the new chat and user message, then text chunks, then the saved AI message with its sources.
@@ -117,8 +119,10 @@ frontend/
     features/share/            public read-only report
     features/legal/            privacy and terms pages
     components/                Brand, legal links
-docs/                          three screenshots
-.github/workflows/ci.yml       API tests, syntax check, frontend lint/build
+docs/                          screenshots, architecture, runbook, ADRs, OpenAPI
+backend/Dockerfile             production API image
+docker-compose.yml             local Mongo and optional full API profile
+.github/workflows/ci.yml       API tests, syntax check, frontend lint/build, Docker image
 ```
 
 ## Run it locally
@@ -195,6 +199,7 @@ Open `/login` and choose **Open the demo desk**.
 | Method | Path | Purpose |
 |---|---|---|
 | `GET` | `/health` | API status, database state, and uptime. |
+| `GET` | `/health/ready` | Mongo ping with latency; returns `503` when unavailable. |
 | `POST` | `/api/auth/register` | Create an account and send a verification email. |
 | `GET` | `/api/auth/verify-email?token=` | Verify an email address and return an HTML confirmation page. |
 | `POST` | `/api/auth/login` | Sign in and set the session cookie. |
@@ -222,7 +227,7 @@ cd backend
 npm test
 ```
 
-`npm test` runs `node --test`. The suite creates an in-memory MongoDB and covers seven cases: health, registration validation, duplicate accounts, unverified-login rejection, the demo session, guest rejection on protected routes, and unknown share links. It does not call Groq, Mistral, or Tavily.
+`npm test` runs `node --test`. The suite creates an in-memory MongoDB and covers eight cases: health, readiness, registration validation, duplicate accounts, unverified-login rejection, the demo session, guest rejection on protected routes, and unknown share links. It does not call Groq, Mistral, or Tavily.
 
 The frontend has no unit-test script. CI runs:
 
